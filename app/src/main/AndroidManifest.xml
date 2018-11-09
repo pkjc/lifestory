@@ -12,8 +12,17 @@
         <activity android:name=".LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".AppIntroActivity" />
+        <activity
+            android:name=".AppHomeActivity"
+            android:label="@string/title_activity_app_home" />
+        <activity android:name=".MemoryActivity">
+            <intent-filter>
+                <action android:name="edu.oakland.lifestory.Memory"/>
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
     </application>

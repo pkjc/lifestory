@@ -27,9 +27,9 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import edu.oakland.lifestory.utils.SharedPrefManager;
 
 // This class is a simple activity with NavigationDrawer
-    // we get data stored in sharedPrefference and display on the header view of the NavigationDrawer
+// we get data stored in sharedPrefference and display on the header view of the NavigationDrawer
 public class NavDrawerActivity extends BaseActivity implements
-        GoogleApiClient.OnConnectionFailedListener{
+        GoogleApiClient.OnConnectionFailedListener {
 
     Context mContext = this;
 
@@ -86,7 +86,7 @@ public class NavDrawerActivity extends BaseActivity implements
     }
 
     // Initialize and add Listener to NavigationDrawer
-    public void initNavigationDrawer(){
+    public void initNavigationDrawer() {
 
         navigationView = (NavigationView) findViewById(R.id.navigation_view);
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
@@ -95,25 +95,21 @@ public class NavDrawerActivity extends BaseActivity implements
 
                 int id = item.getItemId();
 
-                switch (id){
-                    case R.id.freebie:
-                        Toast.makeText(getApplicationContext(),"Home",Toast.LENGTH_SHORT).show();
-                        drawerLayout.closeDrawers();
-                        break;
+                switch (id) {
                     case R.id.payment:
-                        Toast.makeText(getApplicationContext(),"Settings",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Settings", Toast.LENGTH_SHORT).show();
                         drawerLayout.closeDrawers();
                         break;
-                    case R.id.trip:
-                        Toast.makeText(getApplicationContext(),"Trash",Toast.LENGTH_SHORT).show();
+                    case R.id.about:
+                        Toast.makeText(getApplicationContext(), "Trash", Toast.LENGTH_SHORT).show();
                         drawerLayout.closeDrawers();
                         break;
-                    case R.id.logout:
+                    case R.id.help:
                         signOut();
                         drawerLayout.closeDrawers();
                         break;
-                    case R.id.tips:
-                        Toast.makeText(getApplicationContext(),"Trash",Toast.LENGTH_SHORT).show();
+                    case R.id.logout:
+                        Toast.makeText(getApplicationContext(), "Trash", Toast.LENGTH_SHORT).show();
                         drawerLayout.closeDrawers();
                         break;
                 }
@@ -123,7 +119,7 @@ public class NavDrawerActivity extends BaseActivity implements
 
         //set up navigation drawer
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer);
-        ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this,drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close){
+        ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close) {
             @Override
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
@@ -139,8 +135,8 @@ public class NavDrawerActivity extends BaseActivity implements
     }
 
     // This method configures Google SignIn
-    public void configureSignIn(){
-// Configure sign-in to request the user's basic profile like name and email
+    public void configureSignIn() {
+        // Configure sign-in to request the user's basic profile like name and email
         GoogleSignInOptions options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .build();
@@ -154,7 +150,7 @@ public class NavDrawerActivity extends BaseActivity implements
     }
 
     //method to logout
-    private void signOut(){
+    private void signOut() {
         new SharedPrefManager(mContext).clear();
         mAuth.signOut();
 

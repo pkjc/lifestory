@@ -8,16 +8,11 @@
             android:title="Home"
             android:icon="@drawable/ic_android_black_24dp"/>
         <item
-            android:id="@+id/trip"
-            android:title="Ship"
+            android:id="@+id/about"
+            android:title="About"
             android:icon="@drawable/ic_build_black_24dp"/>
         <item
-            android:id="@+id/freebie"
-            android:title="Free Rides"
-            android:icon="@drawable/ic_forward_black_24dp"/>
-
-        <item
-            android:id="@+id/tips"
+            android:id="@+id/help"
             android:title="Help"
             android:icon="@drawable/ic_forward_black_24dp"/>
         <item

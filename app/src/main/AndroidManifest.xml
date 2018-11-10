@@ -19,6 +19,7 @@
         <activity
             android:name=".AppHomeActivity"
             android:label="@string/title_activity_app_home" />
+        <activity android:name=".NavDrawerActivity"></activity>
         <activity android:name=".MemoryActivity">
             <intent-filter>
                 <action android:name="edu.oakland.lifestory.Memory"/>

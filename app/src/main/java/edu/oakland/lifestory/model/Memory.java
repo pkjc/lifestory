@@ -1,4 +1,4 @@
-package edu.oakland.lifestory;
+package edu.oakland.lifestory.model;
 
 public class Memory {
 

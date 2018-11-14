@@ -1,14 +1,20 @@
 package edu.oakland.lifestory;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 
 import java.util.ArrayList;
 
@@ -20,6 +26,7 @@ public class AppHomeActivity extends AppCompatActivity {
     private TextView noMemory = null;
     ArrayList<Memory> memories = new ArrayList<Memory>();
     LinearLayout memoryLayout = null;
+    ImageButton backButton, quickCreateText, quickCreateImage, quickCreateAudio;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -28,20 +35,15 @@ public class AppHomeActivity extends AppCompatActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-                    //mTextMessage.setText(R.string.title_home);
-                    return true;
+                     return true;
                 case R.id.navigation_settings:
-                    //mTextMessage.setText(R.string.action_settings);
-                    return true;
+                     return true;
                 case R.id.navigation_add:
-                    //mTextMessage.setText(R.string.title_create);
-                    return true;
+                     return true;
                 case R.id.navigation_dashboard:
-                    //mTextMessage.setText(R.string.title_search);
-                    return true;
+                     return true;
                 case R.id.navigation_calendar:
-                    //mTextMessage.setText(R.string.title_calendar);
-                    return true;
+                     return true;
             }
             return false;
         }
@@ -51,7 +53,25 @@ public class AppHomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_home);
+        Toolbar toolbar = findViewById(R.id.appToolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
+        backButton = toolbar.findViewById(R.id.backButton);
+        quickCreateText = toolbar.findViewById(R.id.quickCreateText);
+        quickCreateImage = toolbar.findViewById(R.id.quickCreateImage);
+        quickCreateAudio = toolbar.findViewById(R.id.quickCreateAudio);
+
+        //For home screen disable back button
+        backButton.setVisibility(View.INVISIBLE);
+        quickCreateText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //navigate to create memory screen
+                Intent intent = new Intent(AppHomeActivity.this, MemoryActivity.class);
+                startActivity(intent);
+            }
+        });
         memoryLayout = findViewById(R.id.memoryLayout);
         memoryLayout.setDividerDrawable(getDrawable(R.drawable.separator_style));
         memories.add(new Memory("First memory", "Glad to have journal of my own!"));
@@ -68,16 +88,17 @@ public class AppHomeActivity extends AppCompatActivity {
 
         for (Memory memory : memories) {
             LayoutInflater inflater = LayoutInflater.from(this);
-            ConstraintLayout constraintLayout = (ConstraintLayout) inflater.inflate(R.layout.activity_memory, null);
+            LinearLayout linearLayout = (LinearLayout) inflater.inflate(R.layout.activity_memory_card, null);
+            CardView cardView = linearLayout.findViewById(R.id.cardView);
 
-            TextView memoryTitle = constraintLayout.findViewById(R.id.memoryTitle);
-            TextView memoryText = constraintLayout.findViewById(R.id.memoryText);
+            LinearLayout viewHolder = cardView.findViewById(R.id.viewHolder);
+            TextView memoryTitle = viewHolder.findViewById(R.id.memoryTitle);
+            TextView memoryText = viewHolder.findViewById(R.id.memoryText);
 
             memoryTitle.setText(memory.getMemoryTitle());
             memoryText.setText(memory.getMemoryText());
 
-            memoryLayout.addView(constraintLayout);
-
+            memoryLayout.addView(linearLayout);
         }
 
     }

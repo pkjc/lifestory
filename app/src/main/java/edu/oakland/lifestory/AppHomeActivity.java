@@ -8,6 +8,7 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -35,10 +36,14 @@ public class AppHomeActivity extends AppCompatActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
+                    /*Intent intent = getIntent();
+                    startActivity(intent);*/
                      return true;
                 case R.id.navigation_settings:
                      return true;
                 case R.id.navigation_add:
+                     Intent intent = new Intent("edu.oakland.lifestory.AddMemory");
+                     startActivity(intent);
                      return true;
                 case R.id.navigation_dashboard:
                      return true;
@@ -73,9 +78,9 @@ public class AppHomeActivity extends AppCompatActivity {
             }
         });
         memoryLayout = findViewById(R.id.memoryLayout);
-        memoryLayout.setDividerDrawable(getDrawable(R.drawable.separator_style));
-        memories.add(new Memory("First memory", "Glad to have journal of my own!"));
-        memories.add(new Memory("Second Memory", "It's quite interesting with Android"));
+        //memoryLayout.setDividerDrawable(getDrawable(R.drawable.separator_style));
+        /*memories.add(new Memory("First memory", "Glad to have journal of my own!"));
+        memories.add(new Memory("Second Memory", "It's quite interesting with Android"));*/
        // mTextMessage = (TextView) findViewById(R.id.message);
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -85,7 +90,22 @@ public class AppHomeActivity extends AppCompatActivity {
             noMemory.setText("No memories Yet! Click on Create Memory to add.");
             memoryLayout.addView(noMemory);
         }
+        renderMemories();
+    }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Log.i("LIFESTORY", "Here for new memory");
+        if(intent.hasExtra("Memory")){
+            Memory newMemory = (Memory) intent.getSerializableExtra("Memory");
+            memories.add(newMemory);
+        }
+        memoryLayout.removeAllViews();
+        renderMemories();
+    }
+
+    private void renderMemories(){
         for (Memory memory : memories) {
             LayoutInflater inflater = LayoutInflater.from(this);
             LinearLayout linearLayout = (LinearLayout) inflater.inflate(R.layout.activity_memory_card, null);
@@ -100,7 +120,6 @@ public class AppHomeActivity extends AppCompatActivity {
 
             memoryLayout.addView(linearLayout);
         }
-
     }
 
 }

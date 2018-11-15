@@ -18,13 +18,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".AppHomeActivity"
-            android:label="@string/title_activity_app_home" />
+        <activity android:name=".AppHomeActivity" android:label="@string/title_activity_app_home">
+            <intent-filter>
+                <action android:name="edu.oakland.lifestory.ReturnHome"></action>
+                <category android:name="android.intent.category.DEFAULT"></category>
+            </intent-filter>
+        </activity>
         <activity android:name=".NavDrawerActivity"></activity>
         <activity android:name=".MemoryActivity">
             <intent-filter>
-                <action android:name="edu.oakland.lifestory.Memory"/>
+                <action android:name="edu.oakland.lifestory.AddMemory"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>

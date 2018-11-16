@@ -31,6 +31,7 @@ public class MemoryActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent homeIntent = new Intent("edu.oakland.lifestory.ReturnHome");
+                homeIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 v.getContext().startActivity(homeIntent);
             }
         });

@@ -10,6 +10,7 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
@@ -28,6 +29,7 @@ public class AppHomeActivity extends AppCompatActivity {
     ArrayList<Memory> memories = new ArrayList<Memory>();
     LinearLayout memoryLayout = null;
     ImageButton backButton, quickCreateText, quickCreateImage, quickCreateAudio;
+    BottomNavigationView navigation = null;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -78,19 +80,28 @@ public class AppHomeActivity extends AppCompatActivity {
             }
         });
         memoryLayout = findViewById(R.id.memoryLayout);
-        //memoryLayout.setDividerDrawable(getDrawable(R.drawable.separator_style));
         /*memories.add(new Memory("First memory", "Glad to have journal of my own!"));
         memories.add(new Memory("Second Memory", "It's quite interesting with Android"));*/
-       // mTextMessage = (TextView) findViewById(R.id.message);
-        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         if(memories.isEmpty()) {
             noMemory = new TextView(getApplicationContext());
             noMemory.setText("No memories Yet! Click on Create Memory to add.");
+            noMemory.setTextColor(getResources().getColor(android.R.color.black));
             memoryLayout.addView(noMemory);
         }
         renderMemories();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(!memories.isEmpty()) {
+            memoryLayout.removeAllViews();
+        }
+        renderMemories();
+        resetNavigation();
     }
 
     @Override
@@ -103,6 +114,7 @@ public class AppHomeActivity extends AppCompatActivity {
         }
         memoryLayout.removeAllViews();
         renderMemories();
+        resetNavigation();
     }
 
     private void renderMemories(){
@@ -122,4 +134,10 @@ public class AppHomeActivity extends AppCompatActivity {
         }
     }
 
+    private void resetNavigation(){
+        if(navigation != null) {
+            navigation.setSelectedItemId(R.id.navigation_home);
+        }
+
+    }
 }

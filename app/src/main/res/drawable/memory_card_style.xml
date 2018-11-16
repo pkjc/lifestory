@@ -9,6 +9,5 @@
         android:gradientRadius="500"
         android:type="radial"
         />
-    <padding android:left="30dp" android:top="30dp"
-        android:right="30dp" android:bottom="30dp" />
+
 </shape>

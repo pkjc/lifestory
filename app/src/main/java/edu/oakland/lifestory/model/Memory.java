@@ -1,6 +1,8 @@
 package edu.oakland.lifestory.model;
 
-public class Memory {
+import java.io.Serializable;
+
+public class Memory implements Serializable {
 
     private String memoryTitle;
     private String memoryText;

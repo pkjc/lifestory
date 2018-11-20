@@ -57,13 +57,13 @@
         android:text="Title"
         android:textAppearance="@android:style/TextAppearance.Medium"
         android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="@+id/memoryTitle"
-        app:layout_constraintEnd_toStartOf="@+id/memoryTitle"
+        app:layout_constraintBottom_toBottomOf="@+id/imgMemTitle"
+        app:layout_constraintEnd_toStartOf="@+id/imgMemTitle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/appToolbar" />
 
     <EditText
-        android:id="@+id/memoryTitle"
+        android:id="@+id/imgMemTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -71,7 +71,7 @@
         android:layout_marginEnd="16dp"
         android:ems="10"
         android:gravity="left|center"
-        android:inputType="textPersonName"
+        android:inputType="textShortMessage"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/titleLabel"
         app:layout_constraintTop_toBottomOf="@+id/appToolbar" />
@@ -87,7 +87,7 @@
         android:inputType="textMultiLine"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/memoryTitle" />
+        app:layout_constraintTop_toBottomOf="@+id/imgMemTitle" />
 
     <Button
         android:id="@+id/createMemButton"

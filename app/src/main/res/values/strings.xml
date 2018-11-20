@@ -22,4 +22,9 @@
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
     <string name="web_client_id">844377011603-b5j224p0tvgmnvhatjo2s2711657hjls.apps.googleusercontent.com</string>
+    <string name="title_activity_image_memory">ImageMemoryActivity</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

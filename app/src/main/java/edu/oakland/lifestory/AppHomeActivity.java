@@ -3,14 +3,12 @@ package edu.oakland.lifestory;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
@@ -79,6 +77,15 @@ public class AppHomeActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        quickCreateImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //navigate to create image memory screen
+                Intent intent = new Intent(AppHomeActivity.this, ImageMemoryActivity.class);
+                startActivity(intent);
+            }
+        });
         memoryLayout = findViewById(R.id.memoryLayout);
         /*memories.add(new Memory("First memory", "Glad to have journal of my own!"));
         memories.add(new Memory("Second Memory", "It's quite interesting with Android"));*/
@@ -124,7 +131,7 @@ public class AppHomeActivity extends AppCompatActivity {
             CardView cardView = linearLayout.findViewById(R.id.cardView);
 
             LinearLayout viewHolder = cardView.findViewById(R.id.viewHolder);
-            TextView memoryTitle = viewHolder.findViewById(R.id.memoryTitle);
+            TextView memoryTitle = viewHolder.findViewById(R.id.imgMemTitle);
             TextView memoryText = viewHolder.findViewById(R.id.memoryText);
 
             memoryTitle.setText(memory.getMemoryTitle());

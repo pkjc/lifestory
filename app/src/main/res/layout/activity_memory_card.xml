@@ -24,7 +24,7 @@
             android:padding="5dp">
 
             <TextView
-                android:id="@+id/memoryTitle"
+                android:id="@+id/imgMemTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="fill_horizontal"
@@ -42,7 +42,7 @@
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/memoryTitle" />
+                app:layout_constraintTop_toBottomOf="@+id/imgMemTitle" />
         </LinearLayout>
     </android.support.v7.widget.CardView>
 

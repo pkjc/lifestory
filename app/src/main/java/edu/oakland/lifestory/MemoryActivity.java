@@ -9,7 +9,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
+
 import edu.oakland.lifestory.model.Memory;
 
 public class MemoryActivity extends AppCompatActivity {
@@ -36,7 +36,7 @@ public class MemoryActivity extends AppCompatActivity {
             }
         });
 
-        memoryTitle = findViewById(R.id.memoryTitle);
+        memoryTitle = findViewById(R.id.imgMemTitle);
         memoryContent = findViewById(R.id.memoryContent);
         createMemButton = findViewById(R.id.createMemButton);
 

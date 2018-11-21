@@ -45,6 +45,8 @@ public class ImageMemoryActivity extends AppCompatActivity implements ImageGalle
      */
     private ViewPager mViewPager;
     ImageButton backButton = null;
+    ImageButton addButton = null;
+    Memory imgMemory = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +64,9 @@ public class ImageMemoryActivity extends AppCompatActivity implements ImageGalle
         // Create the adapter that will return a fragment for each of the two
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), tabLayout.getTabCount());
-
+        //Add this for adding icons for tabs
+        /*tabLayout.getTabAt(0).setIcon(R.drawable.gallery);
+        tabLayout.getTabAt(1).setIcon(R.drawable.camera);*/
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
@@ -79,7 +83,19 @@ public class ImageMemoryActivity extends AppCompatActivity implements ImageGalle
                 v.getContext().startActivity(homeIntent);
             }
         });
-
+        addButton = toolbar.findViewById(R.id.addButton);
+        addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent homeIntent = new Intent("edu.oakland.lifestory.ReturnHome");
+                homeIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                if(imgMemory != null) {
+                    imgMemory.setMemoryType("ImageMemory");
+                    homeIntent.putExtra("ImageMemory", imgMemory);
+                }
+                v.getContext().startActivity(homeIntent);
+            }
+        });
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -97,21 +113,21 @@ public class ImageMemoryActivity extends AppCompatActivity implements ImageGalle
             }
         });
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
-        });
+        });*/
 
     }
 
     @Override
-    public void setImageBitmap(Bitmap bitmap) {
-        //get the bitmap value and add to list for home screen
-
+    public void setImageBitmapUri(String bitmapUri) {
+        //get the bitmap uri and add to list for home screen
+        imgMemory = new Memory("Temp", bitmapUri, 0);
     }
 
 

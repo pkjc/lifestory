@@ -8,16 +8,33 @@ public class Memory implements Serializable {
 
     private String memoryTitle;
     private String memoryText;
+    private String memoryType;
+    private int imgBitmap;
+    private String bitMapUri;
 
-    public Bitmap getImgBitmap() {
+    public String getBitMapUri() {
+        return bitMapUri;
+    }
+
+    public void setBitMapUri(String bitMapUri) {
+        this.bitMapUri = bitMapUri;
+    }
+
+    public int getImgBitmap() {
         return imgBitmap;
     }
 
-    public void setImgBitmap(Bitmap imgBitmap) {
+    public void setImgBitmap(int imgBitmap) {
         this.imgBitmap = imgBitmap;
     }
 
-    private Bitmap imgBitmap;
+    public String getMemoryType() {
+        return memoryType;
+    }
+
+    public void setMemoryType(String memoryType) {
+        this.memoryType = memoryType;
+    }
 
     public String getMemoryTitle() {
         return memoryTitle;
@@ -40,8 +57,9 @@ public class Memory implements Serializable {
         this.memoryText = memoryText;
     }
 
-    public Memory(String memoryTitle, Bitmap bitmap){
+    public Memory(String memoryTitle, String bitmapUri, int bitmap){
         this.memoryTitle = memoryTitle;
+        this.bitMapUri = bitmapUri;
         this.imgBitmap = bitmap;
     }
 }

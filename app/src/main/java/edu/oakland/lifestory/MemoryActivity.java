@@ -52,6 +52,7 @@ public class MemoryActivity extends AppCompatActivity {
 
                 Intent homeIntent = new Intent("edu.oakland.lifestory.ReturnHome");
                 homeIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                memory.setMemoryType("Memory");
                 homeIntent.putExtra("Memory", memory);
                 v.getContext().startActivity(homeIntent);
             }

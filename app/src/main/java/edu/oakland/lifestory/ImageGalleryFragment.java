@@ -37,7 +37,7 @@ import edu.oakland.lifestory.model.Memory;
 public class ImageGalleryFragment extends Fragment {
     TextView imgTitle = null;
     EditText imgMemTitle = null;
-    Button browseBtn, addImgBtn, cancelBtn = null;
+    Button browseBtn, cancelBtn = null;
     View view = null;
     ImageView imgMemory = null;
     private int CHOOSE_IMAGE_REQUEST = 1;
@@ -78,9 +78,10 @@ public class ImageGalleryFragment extends Fragment {
         view = inflater.inflate(R.layout.fragment_image_gallery, container, false);
         browseBtn = view.findViewById(R.id.browseBtn);
         imgMemory = view.findViewById(R.id.imgMemory);
-        addImgBtn = view.findViewById(R.id.addImgBtn);
         cancelBtn = view.findViewById(R.id.cancelBtn);
         imgMemTitle = view.findViewById(R.id.imgMemTitle);
+        //set invisible
+        imgMemory.setVisibility(View.INVISIBLE);
 
         browseBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,14 +90,13 @@ public class ImageGalleryFragment extends Fragment {
                 startActivityForResult(galleryIntent, CHOOSE_IMAGE_REQUEST);
             }
         });
-
-        addImgBtn.setOnClickListener(new View.OnClickListener() {
+        cancelBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Bitmap bitMap = ((BitmapDrawable)imgMemory.getDrawable()).getBitmap();
-                Memory imgMemory = new Memory(imgMemTitle.getText().toString(), bitMap);
-
-
+                //set browse button enabled on cancel
+                browseBtn.setEnabled(true);
+                //clear the image view
+                imgMemory.setImageResource(android.R.color.transparent);
             }
         });
         // Inflate the layout for this fragment
@@ -111,25 +111,19 @@ public class ImageGalleryFragment extends Fragment {
         }
         InputStream stream = null;
         if(requestCode == CHOOSE_IMAGE_REQUEST && data != null){
-            /*Uri contentURI = data.getData();
-            String[] filePathColumn = {MediaStore.Images.Media.DATA};
-
-            Cursor cursor = getActivity().getContentResolver().query(contentURI, filePathColumn, null, null, null);
-            cursor.moveToFirst();
-
-            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-            String picturePath = cursor.getString(columnIndex);
-            cursor.close();*/
-            //imgMemory.setImageBitmap(BitmapFactory.decodeFile(picturePath));
+            Uri contentURI = data.getData();
             try {
-                stream = getActivity().getContentResolver().openInputStream(data.getData());
-                Bitmap original = BitmapFactory.decodeStream(stream);
-                Bitmap finalBM = Bitmap.createScaledBitmap(original, original.getWidth(), original.getHeight(), true);
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), contentURI);
+                Bitmap finalBM = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth(), bitmap.getHeight(), true);
                 imgMemory.setImageBitmap(finalBM);
-                mListener.setImageBitmap(finalBM);
-            } catch (FileNotFoundException e) {
+                imgMemory.setVisibility(View.VISIBLE);
+                //disable browse button
+                browseBtn.setEnabled(false);
+            } catch (IOException e) {
                 e.printStackTrace();
             }
+            mListener.setImageBitmapUri(contentURI.toString());
+
             if(stream != null){
                 try {
                     stream.close();
@@ -176,6 +170,6 @@ public class ImageGalleryFragment extends Fragment {
      */
     public interface OnGalleryFragmentInteractionListener {
         // TODO: Update argument type and name
-        void setImageBitmap(Bitmap bitmap);
+       void setImageBitmapUri(String path);
     }
 }

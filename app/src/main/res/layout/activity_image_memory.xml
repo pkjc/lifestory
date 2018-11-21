@@ -21,9 +21,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
+            android:layout_alignParentTop="true" android:layout_marginLeft="10pt"
             android:background="@drawable/ic_chevron_left_white_24dp" />
-
         <TextView
             android:id="@+id/toolBarTitle"
             style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
@@ -34,6 +33,12 @@
             android:layout_gravity="center"
             android:text="Add Image Memory"
             android:textColor="@android:color/white" />
+
+        <ImageButton
+            android:id="@+id/addButton" android:layout_gravity="end"
+            android:layout_width="wrap_content" android:layout_alignParentTop="true"
+            android:layout_height="wrap_content" android:layout_alignParentEnd="true"
+            android:background="@drawable/ic_done_white_24dp" android:layout_marginRight="10pt" />
         </android.support.v7.widget.Toolbar>
 
     <android.support.design.widget.TabLayout android:id="@+id/tabLayout"

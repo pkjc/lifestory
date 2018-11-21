@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -22,6 +23,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
+import edu.oakland.lifestory.model.Memory;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -32,16 +35,14 @@ import java.io.InputStream;
  * create an instance of this fragment.
  */
 public class ImageGalleryFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    TextView imgTitle = null;
+    EditText imgMemTitle = null;
+    Button browseBtn, addImgBtn, cancelBtn = null;
+    View view = null;
+    ImageView imgMemory = null;
+    private int CHOOSE_IMAGE_REQUEST = 1;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    //private OnFragmentInteractionListener mListener;
+    private OnGalleryFragmentInteractionListener mListener;
 
     /*public ImageGalleryFragment() {
         // Required empty public constructor
@@ -56,30 +57,20 @@ public class ImageGalleryFragment extends Fragment {
      * @return A new instance of fragment ImageGalleryFragment.
      */
     // TODO: Rename and change types and number of parameters
-    /*public static ImageGalleryFragment newInstance(String param1, String param2) {
+    public static ImageGalleryFragment newInstance(String param1, String param2) {
         ImageGalleryFragment fragment = new ImageGalleryFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
-    }*/
+    }
 
     //@Override
-    /*public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+
         }
-    }*/
-
-    TextView imgTitle = null;
-    EditText imgMemTitle = null;
-    Button browseBtn, addImgBtn = null;
-    View view = null;
-    ImageView imgMemory = null;
-
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -88,12 +79,24 @@ public class ImageGalleryFragment extends Fragment {
         browseBtn = view.findViewById(R.id.browseBtn);
         imgMemory = view.findViewById(R.id.imgMemory);
         addImgBtn = view.findViewById(R.id.addImgBtn);
+        cancelBtn = view.findViewById(R.id.cancelBtn);
+        imgMemTitle = view.findViewById(R.id.imgMemTitle);
 
         browseBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(galleryIntent, 1);
+                startActivityForResult(galleryIntent, CHOOSE_IMAGE_REQUEST);
+            }
+        });
+
+        addImgBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Bitmap bitMap = ((BitmapDrawable)imgMemory.getDrawable()).getBitmap();
+                Memory imgMemory = new Memory(imgMemTitle.getText().toString(), bitMap);
+
+
             }
         });
         // Inflate the layout for this fragment
@@ -107,7 +110,7 @@ public class ImageGalleryFragment extends Fragment {
             return;
         }
         InputStream stream = null;
-        if(requestCode == 1 && data != null){
+        if(requestCode == CHOOSE_IMAGE_REQUEST && data != null){
             /*Uri contentURI = data.getData();
             String[] filePathColumn = {MediaStore.Images.Media.DATA};
 
@@ -121,9 +124,9 @@ public class ImageGalleryFragment extends Fragment {
             try {
                 stream = getActivity().getContentResolver().openInputStream(data.getData());
                 Bitmap original = BitmapFactory.decodeStream(stream);
-
-                imgMemory.setImageBitmap(Bitmap.createScaledBitmap(original, original.getWidth(), original.getHeight(), true));
-
+                Bitmap finalBM = Bitmap.createScaledBitmap(original, original.getWidth(), original.getHeight(), true);
+                imgMemory.setImageBitmap(finalBM);
+                mListener.setImageBitmap(finalBM);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
@@ -134,9 +137,6 @@ public class ImageGalleryFragment extends Fragment {
                     e.printStackTrace();
                 }
             }
-
-
-
         }
     }
 
@@ -147,22 +147,22 @@ public class ImageGalleryFragment extends Fragment {
         }
     }*/
 
-    /*@Override
+    @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
+        if (context instanceof OnGalleryFragmentInteractionListener) {
+            mListener = (OnGalleryFragmentInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
         }
-    }*/
+    }
 
-   /* @Override
+    @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
-    }*/
+    }
 
     /**
      * This interface must be implemented by activities that contain this
@@ -174,8 +174,8 @@ public class ImageGalleryFragment extends Fragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    /*public interface OnFragmentInteractionListener {
+    public interface OnGalleryFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
-    }*/
+        void setImageBitmap(Bitmap bitmap);
+    }
 }

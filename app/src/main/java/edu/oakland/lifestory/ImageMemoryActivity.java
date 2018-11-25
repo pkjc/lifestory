@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TableLayout;
 import android.widget.TextView;
@@ -47,7 +48,7 @@ public class ImageMemoryActivity extends AppCompatActivity implements ImageGalle
     ImageButton backButton = null;
     ImageButton addButton = null;
     Memory imgMemory = null;
-
+    EditText imgMemTitle = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,13 +84,17 @@ public class ImageMemoryActivity extends AppCompatActivity implements ImageGalle
                 v.getContext().startActivity(homeIntent);
             }
         });
+        imgMemTitle = findViewById(R.id.imgMemTitle);
+
         addButton = toolbar.findViewById(R.id.addButton);
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String title = imgMemTitle.getText().toString();
                 Intent homeIntent = new Intent("edu.oakland.lifestory.ReturnHome");
                 homeIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 if(imgMemory != null) {
+                    imgMemory.setMemoryTitle(title);
                     imgMemory.setMemoryType("ImageMemory");
                     homeIntent.putExtra("ImageMemory", imgMemory);
                 }

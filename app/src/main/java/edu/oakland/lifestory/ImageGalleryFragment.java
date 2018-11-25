@@ -35,8 +35,6 @@ import edu.oakland.lifestory.model.Memory;
  * create an instance of this fragment.
  */
 public class ImageGalleryFragment extends Fragment {
-    TextView imgTitle = null;
-    EditText imgMemTitle = null;
     Button browseBtn, cancelBtn = null;
     View view = null;
     ImageView imgMemory = null;
@@ -64,7 +62,7 @@ public class ImageGalleryFragment extends Fragment {
         return fragment;
     }
 
-    //@Override
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
@@ -79,7 +77,6 @@ public class ImageGalleryFragment extends Fragment {
         browseBtn = view.findViewById(R.id.browseBtn);
         imgMemory = view.findViewById(R.id.imgMemory);
         cancelBtn = view.findViewById(R.id.cancelBtn);
-        imgMemTitle = view.findViewById(R.id.imgMemTitle);
         //set invisible
         imgMemory.setVisibility(View.INVISIBLE);
 
@@ -169,7 +166,6 @@ public class ImageGalleryFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnGalleryFragmentInteractionListener {
-        // TODO: Update argument type and name
-       void setImageBitmapUri(String path);
+         void setImageBitmapUri(String path);
     }
 }

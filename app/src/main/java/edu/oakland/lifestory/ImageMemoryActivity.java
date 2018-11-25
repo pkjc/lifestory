@@ -1,10 +1,7 @@
 package edu.oakland.lifestory;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -14,22 +11,12 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.TableLayout;
-import android.widget.TextView;
-
-import edu.oakland.lifestory.interfaces.IFragmentToActivity;
 import edu.oakland.lifestory.model.Memory;
 
-public class ImageMemoryActivity extends AppCompatActivity implements ImageGalleryFragment.OnGalleryFragmentInteractionListener {
+public class ImageMemoryActivity extends AppCompatActivity implements ImageGalleryFragment.OnGalleryFragmentInteractionListener, ImageCameraFragment.OnCameraFragmentInteractionListener {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -130,9 +117,20 @@ public class ImageMemoryActivity extends AppCompatActivity implements ImageGalle
     }
 
     @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data){
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
     public void setImageBitmapUri(String bitmapUri) {
         //get the bitmap uri and add to list for home screen
         imgMemory = new Memory("Temp", bitmapUri, 0);
+    }
+
+    @Override
+    public void setCameraImageBmUri(String uri) {
+        //get the bitmap uri and add to list for home screen
+        imgMemory = new Memory("Temp", uri, 0);
     }
 
 
@@ -184,7 +182,6 @@ public class ImageMemoryActivity extends AppCompatActivity implements ImageGalle
                 default:
                     return null;
             }
-            //return PlaceholderFragment.newInstance(position + 1);
         }
 
         @Override

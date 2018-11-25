@@ -1,12 +1,22 @@
 package edu.oakland.lifestory;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 
 /**
@@ -27,7 +37,11 @@ public class ImageCameraFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 */
-    private OnFragmentInteractionListener mListener;
+    static final int REQUEST_IMAGE_CAPTURE = 1;
+    private OnCameraFragmentInteractionListener mListener;
+    ImageView capturedImage = null;
+    Button clickPicture = null;
+    View view = null;
 
     public ImageCameraFragment() {
         // Required empty public constructor
@@ -62,10 +76,44 @@ public class ImageCameraFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        view = inflater.inflate(R.layout.fragment_image_camera, container, false);
+        capturedImage = view.findViewById(R.id.capturedImage);
+        clickPicture = view.findViewById(R.id.clickPicture);
+
+        clickPicture.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                if(takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null){
+                    ImageCameraFragment.this.startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                }
+            }
+        });
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_image_camera, container, false);
+        return view;
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data){
+        super.onActivityResult(requestCode,resultCode,data);
+
+        if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK){
+            Bundle bundle = data.getExtras();
+            Bitmap imageBitmap = (Bitmap) bundle.get("data");
+            capturedImage.setImageBitmap(imageBitmap);
+            //disable browse button
+            clickPicture.setEnabled(false);
+            Uri contentURI = getCameraImageUri(imageBitmap);
+            mListener.setCameraImageBmUri(contentURI.toString());
+        }
+
+    }
+
+    private Uri getCameraImageUri(Bitmap bitmap){
+        Bitmap finalBM = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth(), bitmap.getHeight(), true);
+        String path = MediaStore.Images.Media.insertImage(getActivity().getContentResolver(), finalBM, null, null);
+        return Uri.parse(path);
+    }
     /*// TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
@@ -76,8 +124,8 @@ public class ImageCameraFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
+        if (context instanceof OnCameraFragmentInteractionListener) {
+            mListener = (OnCameraFragmentInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -100,8 +148,8 @@ public class ImageCameraFragment extends Fragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnFragmentInteractionListener {
+    public interface OnCameraFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+        void setCameraImageBmUri(String bmUri);
     }
 }

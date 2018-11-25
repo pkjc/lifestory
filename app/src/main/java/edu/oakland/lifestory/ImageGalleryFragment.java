@@ -1,5 +1,6 @@
 package edu.oakland.lifestory;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -106,8 +107,8 @@ public class ImageGalleryFragment extends Fragment {
         if (resultCode == 0){
             return;
         }
-        InputStream stream = null;
-        if(requestCode == CHOOSE_IMAGE_REQUEST && data != null){
+
+        if(requestCode == CHOOSE_IMAGE_REQUEST && data != null && resultCode == Activity.RESULT_OK){
             Uri contentURI = data.getData();
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), contentURI);
@@ -120,14 +121,6 @@ public class ImageGalleryFragment extends Fragment {
                 e.printStackTrace();
             }
             mListener.setImageBitmapUri(contentURI.toString());
-
-            if(stream != null){
-                try {
-                    stream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
 

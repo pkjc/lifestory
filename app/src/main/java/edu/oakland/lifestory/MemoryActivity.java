@@ -14,19 +14,18 @@ import edu.oakland.lifestory.model.Memory;
 
 public class MemoryActivity extends AppCompatActivity {
     EditText memoryTitle, memoryContent = null;
-    Button createMemButton = null;
-    ImageButton backButton = null;
-    RelativeLayout toolHolder = null;
+    ImageButton backButton, createMemButton = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_memory);
         Toolbar toolbar = findViewById(R.id.appToolbar);
         setSupportActionBar(toolbar);
+        //Hide the app name
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        toolHolder = toolbar.findViewById(R.id.toolHolder);
-        backButton = toolHolder.findViewById(R.id.backButton);
-
+        backButton = toolbar.findViewById(R.id.backButton);
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -38,7 +37,7 @@ public class MemoryActivity extends AppCompatActivity {
 
         memoryTitle = findViewById(R.id.imgMemTitle);
         memoryContent = findViewById(R.id.memoryContent);
-        createMemButton = findViewById(R.id.createMemButton);
+        createMemButton = toolbar.findViewById(R.id.createMemButton);
 
         createMemButton.setOnClickListener(new View.OnClickListener() {
             @Override

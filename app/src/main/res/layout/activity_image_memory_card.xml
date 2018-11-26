@@ -33,13 +33,13 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
-                android:id="@+id/memoryText"
+            <ImageView
+                android:id="@+id/memoryImage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="fill_horizontal"
                 android:layout_marginTop="16dp"
-                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:contentDescription="Memory Image"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/imgMemTitle" />

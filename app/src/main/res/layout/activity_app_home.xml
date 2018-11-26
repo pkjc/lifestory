@@ -20,7 +20,7 @@
     <ScrollView
         android:id="@+id/scrollView2"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="0dp" android:fillViewport="true"
         android:background="@drawable/layout_background_style"
         app:layout_constraintBottom_toTopOf="@+id/navigation"
         app:layout_constraintEnd_toEndOf="parent"
@@ -44,37 +44,68 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
+        android:fitsSystemWindows="true"
         android:minHeight="?attr/actionBarSize"
-        android:theme="?attr/actionBarTheme" android:fitsSystemWindows="true"
+        android:theme="?attr/actionBarTheme"
         app:layout_constraintBottom_toTopOf="@+id/scrollView2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-        <RelativeLayout android:id="@+id/toolHolder"
+
+        <RelativeLayout
+            android:id="@+id/toolHolder"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-        <ImageButton android:id="@+id/backButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:background="@drawable/ic_chevron_left_white_24dp"
-            android:layout_alignParentLeft="true" android:layout_alignParentTop="true"/>
-        <TextView android:id="@+id/toolBarTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@android:color/white" android:layout_gravity="center"
-            android:text="Home" style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
-            android:layout_alignParentTop="true" android:layout_centerHorizontal="true"/>
-        <ImageButton android:id="@+id/quickCreateText" android:background="@drawable/ic_quick_add_white_24dp"
-            android:layout_width="wrap_content" android:tooltipText="Create Memory"
-            android:layout_height="wrap_content" android:layout_marginRight="50dp"
-            android:layout_toLeftOf="@+id/quickCreateImage" android:layout_alignBottom="@+id/quickCreateImage" />
-        <ImageButton android:id="@+id/quickCreateImage" android:background="@drawable/ic_quick_image_white_24dp"
-            android:layout_width="wrap_content" android:tooltipText="Add Image"
-            android:layout_marginTop="50dp" android:layout_marginBottom="40dp"
-            android:layout_height="wrap_content" android:layout_centerHorizontal="true" android:layout_below="@+id/toolBarTitle"/>
-        <ImageButton android:id="@+id/quickCreateAudio" android:background="@drawable/ic_quick_voice_white_24dp"
-            android:layout_width="wrap_content" android:layout_marginLeft="50dp"
-            android:layout_height="wrap_content" android:tooltipText="Add Audio"
-            android:layout_alignBottom="@+id/quickCreateImage" android:layout_toRightOf="@+id/quickCreateImage"/>
+
+            <ImageButton
+                android:id="@+id/backButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:background="@drawable/ic_chevron_left_white_24dp" />
+
+            <TextView
+                android:id="@+id/toolBarTitle"
+                style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_gravity="center"
+                android:text="Home"
+                android:textColor="@android:color/white" />
+
+            <ImageButton
+                android:id="@+id/quickCreateText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/quickCreateImage"
+                android:layout_marginRight="50dp"
+                android:layout_toLeftOf="@+id/quickCreateImage"
+                android:background="@drawable/ic_quick_add_white_24dp"
+                android:tooltipText="Create Memory" />
+
+            <ImageButton
+                android:id="@+id/quickCreateImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/toolBarTitle"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="50dp"
+                android:layout_marginBottom="40dp"
+                android:background="@drawable/ic_quick_image_white_24dp"
+                android:tooltipText="Add Image" />
+
+            <ImageButton
+                android:id="@+id/quickCreateAudio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/quickCreateImage"
+                android:layout_marginLeft="50dp"
+                android:layout_toRightOf="@+id/quickCreateImage"
+                android:background="@drawable/ic_quick_voice_white_24dp"
+                android:tooltipText="Add Audio" />
         </RelativeLayout>
     </android.support.v7.widget.Toolbar>
 

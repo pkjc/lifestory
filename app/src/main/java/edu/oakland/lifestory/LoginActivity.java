@@ -217,7 +217,7 @@ public class LoginActivity extends BaseActivity implements GoogleApiClient.Conne
                             createUserInFirebaseHelper();
                             Toast.makeText(LoginActivity.this, "Login successful",
                                     Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(LoginActivity.this, NavDrawerActivity.class);
+                            Intent intent = new Intent(LoginActivity.this, AppHomeActivity.class);
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             startActivity(intent);
                             finish();

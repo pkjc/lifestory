@@ -1,7 +1,5 @@
 package edu.oakland.lifestory.model;
 
-import android.graphics.Bitmap;
-
 import java.io.Serializable;
 
 public class Memory implements Serializable {
@@ -51,6 +49,8 @@ public class Memory implements Serializable {
     public void setMemoryText(String memoryText) {
         this.memoryText = memoryText;
     }
+
+    public Memory() { }
 
     public Memory(String memoryTitle, String memoryText) {
         this.memoryTitle = memoryTitle;

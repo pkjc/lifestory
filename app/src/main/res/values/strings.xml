@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">LifeStory</string>
     <string name="title_activity_app_home">AppHomeActivity</string>
-    <string name="intro_title">LIFESTORY</string>
+    <string name="intro_title">WELCOME TO LIFESTORY</string>
     <string name="intro_text">
         "What is Lifestory and How to use Lifestory.\n\n"
 
@@ -9,7 +9,7 @@
         "The supported features like Create written memory, record your memory, add the pictures to your memory. "
         "Home screen provides navigation links to create, view or search your memories. \n\n"
     </string>
-    <string name="intro_create_button">Create First Memory</string>
+    <string name="intro_create_button">Create Memory</string>
     <string name="intro_skip_button">Skip For Now</string>
     <string name="action_settings">Settings</string>
     <string name="title_home">Home</string>

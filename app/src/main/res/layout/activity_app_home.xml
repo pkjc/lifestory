@@ -63,6 +63,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentTop="true"
+                android:layout_marginTop="8dp"
                 android:background="@drawable/ic_chevron_left_white_24dp" />
 
             <TextView
@@ -73,6 +74,7 @@
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
                 android:layout_gravity="center"
+                android:layout_marginTop="8dp"
                 android:text="Home"
                 android:textColor="@android:color/white" />
 
@@ -92,8 +94,8 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/toolBarTitle"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="50dp"
-                android:layout_marginBottom="40dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
                 android:background="@drawable/ic_quick_image_white_24dp"
                 android:tooltipText="Add Image" />
 

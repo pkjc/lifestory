@@ -21,8 +21,8 @@ import edu.oakland.lifestory.model.Memory;
 public class MemoryActivity extends AppCompatActivity {
     EditText memoryTitle, memoryContent = null;
     ImageButton backButton, createMemButton = null;
-
-    private DocumentReference mDocRef = FirebaseFirestore.getInstance().document("memories/memory");
+    int i;
+    private FirebaseFirestore mFirestore = FirebaseFirestore.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,19 +55,33 @@ public class MemoryActivity extends AppCompatActivity {
 
                 //Add date and time of creation as well
                 Memory memory = new Memory(memoryTag, memoryText);
-
-                mDocRef.set(memory).addOnCompleteListener(new OnCompleteListener<Void>() {
+                DocumentReference mDocRef = mFirestore.document("memories/memory"+ i);
+                mFirestore.collection("memories").add(memory).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
                     private static final String TAG = "MemoryActivity";
                     @Override
-                    public void onComplete(@NonNull Task<Void> task) {
+                    public void onComplete(@NonNull Task<DocumentReference> task) {
                         if(task.isSuccessful()){
                             Toast.makeText(MemoryActivity.this, "Memory Added Successfully!", Toast.LENGTH_SHORT).show();
+                            i++;
                         } else {
                             Toast.makeText(MemoryActivity.this, "Error Occurred!", Toast.LENGTH_SHORT).show();
                             Log.d(TAG, "onComplete: ", task.getException());
                         }
                     }
                 });
+//                mDocRef.set(memory).addOnCompleteListener(new OnCompleteListener<Void>() {
+//                    private static final String TAG = "MemoryActivity";
+//                    @Override
+//                    public void onComplete(@NonNull Task<Void> task) {
+//                        if(task.isSuccessful()){
+//                            Toast.makeText(MemoryActivity.this, "Memory Added Successfully!", Toast.LENGTH_SHORT).show();
+//                            i++;
+//                        } else {
+//                            Toast.makeText(MemoryActivity.this, "Error Occurred!", Toast.LENGTH_SHORT).show();
+//                            Log.d(TAG, "onComplete: ", task.getException());
+//                        }
+//                    }
+//                });
 
                 Intent homeIntent = new Intent("edu.oakland.lifestory.ReturnHome");
                 homeIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);

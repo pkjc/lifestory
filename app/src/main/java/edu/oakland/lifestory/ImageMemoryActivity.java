@@ -62,6 +62,8 @@ public class ImageMemoryActivity extends AppCompatActivity implements ImageGalle
         //enable below and add tab title
         //tabLayout.setupWithViewPager(mViewPager);
 
+        Intent intent = getIntent();
+        String requestFrom = intent.getStringExtra("RequestFrom");
         backButton = toolbar.findViewById(R.id.backButton);
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override

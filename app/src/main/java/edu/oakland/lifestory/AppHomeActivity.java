@@ -42,8 +42,6 @@ public class AppHomeActivity extends AppCompatActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-                    /*Intent intent = getIntent();
-                    startActivity(intent);*/
                      return true;
                 case R.id.navigation_settings:
                      return true;
@@ -93,8 +91,6 @@ public class AppHomeActivity extends AppCompatActivity {
             }
         });
         memoryLayout = findViewById(R.id.memoryLayout);
-        /*memories.add(new Memory("First memory", "Glad to have journal of my own!"));
-        memories.add(new Memory("Second Memory", "It's quite interesting with Android"));*/
         navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 

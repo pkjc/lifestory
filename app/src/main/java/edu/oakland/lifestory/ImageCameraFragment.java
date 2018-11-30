@@ -3,22 +3,26 @@ package edu.oakland.lifestory;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-
-
+import static android.Manifest.permission.CAMERA;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
@@ -38,6 +42,8 @@ public class ImageCameraFragment extends Fragment {
     private String mParam2;
 */
     static final int REQUEST_IMAGE_CAPTURE = 1;
+    static final int PERMISSION_REQUEST_CAMERA = 1;
+    static final int PERMISSION_WRITE_EXTERNAL_STORAGE = 2;
     private OnCameraFragmentInteractionListener mListener;
     ImageView capturedImage = null;
     Button clickPicture = null;
@@ -83,14 +89,38 @@ public class ImageCameraFragment extends Fragment {
         clickPicture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                if(takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null){
-                    ImageCameraFragment.this.startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                if(ContextCompat.checkSelfPermission(getActivity(), CAMERA) == PackageManager.PERMISSION_GRANTED){
+                    Intent takePictureIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                    if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+                        ImageCameraFragment.this.startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                    }
+                } else {
+                    ActivityCompat.requestPermissions(getActivity(), new String[]{CAMERA},PERMISSION_REQUEST_CAMERA);
                 }
             }
         });
         // Inflate the layout for this fragment
         return view;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults){
+        switch (requestCode){
+            case PERMISSION_REQUEST_CAMERA: {
+                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(getActivity(), "Permission granted", Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(getActivity(), "Permission Denied", Toast.LENGTH_LONG).show();
+                }
+            }
+            case PERMISSION_WRITE_EXTERNAL_STORAGE:{
+                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(getActivity(), "Permission granted", Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(getActivity(), "Permission Denied", Toast.LENGTH_LONG).show();
+                }
+            }
+        }
     }
 
     @Override
@@ -111,7 +141,12 @@ public class ImageCameraFragment extends Fragment {
 
     private Uri getCameraImageUri(Bitmap bitmap){
         Bitmap finalBM = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth(), bitmap.getHeight(), true);
-        String path = MediaStore.Images.Media.insertImage(getActivity().getContentResolver(), finalBM, null, null);
+        String path = "";
+        if(ContextCompat.checkSelfPermission(getActivity(),WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            path = MediaStore.Images.Media.insertImage(getActivity().getContentResolver(), finalBM, null, null);
+        } else {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{WRITE_EXTERNAL_STORAGE},PERMISSION_WRITE_EXTERNAL_STORAGE);
+        }
         return Uri.parse(path);
     }
     /*// TODO: Rename method, update argument and hook method into UI event

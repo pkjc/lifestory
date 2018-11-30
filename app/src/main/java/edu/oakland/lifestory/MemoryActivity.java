@@ -41,7 +41,8 @@ public class MemoryActivity extends AppCompatActivity {
     ImageButton backButton, createMemButton = null;
     ImageView imageView;
 
-    private DocumentReference mDocRef = FirebaseFirestore.getInstance().document("memories/memory");
+    int i;
+    private FirebaseFirestore mFirestore = FirebaseFirestore.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,13 +109,15 @@ public class MemoryActivity extends AppCompatActivity {
 
                 //Add date and time of creation as well
                 Memory memory = new Memory(memoryTag, memoryText);
-
-                mDocRef.set(memory).addOnCompleteListener(new OnCompleteListener<Void>() {
+                memory.setMemoryType("Memory");
+                DocumentReference mDocRef = mFirestore.document("memories/memory"+ i);
+                mFirestore.collection("memories").add(memory).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
                     private static final String TAG = "MemoryActivity";
                     @Override
-                    public void onComplete(@NonNull Task<Void> task) {
+                    public void onComplete(@NonNull Task<DocumentReference> task) {
                         if(task.isSuccessful()){
                             Toast.makeText(MemoryActivity.this, "Memory Added Successfully!", Toast.LENGTH_SHORT).show();
+                            i++;
                         } else {
                             Toast.makeText(MemoryActivity.this, "Error Occurred!", Toast.LENGTH_SHORT).show();
                             Log.d(TAG, "onComplete: ", task.getException());
@@ -124,7 +127,6 @@ public class MemoryActivity extends AppCompatActivity {
 
                 Intent homeIntent = new Intent("edu.oakland.lifestory.ReturnHome");
                 homeIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                memory.setMemoryType("Memory");
                 homeIntent.putExtra("Memory", memory);
                 v.getContext().startActivity(homeIntent);
             }

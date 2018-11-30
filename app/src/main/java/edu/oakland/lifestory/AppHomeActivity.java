@@ -2,7 +2,6 @@ package edu.oakland.lifestory;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -20,6 +19,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,6 +39,7 @@ public class AppHomeActivity extends AppCompatActivity {
     LinearLayout memoryLayout = null;
     ImageButton backButton, quickCreateText, quickCreateImage, quickCreateAudio;
     BottomNavigationView navigation = null;
+    private FirebaseFirestore mFirestore = FirebaseFirestore.getInstance();
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -94,13 +100,26 @@ public class AppHomeActivity extends AppCompatActivity {
         navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-        if(memories.isEmpty()) {
-            noMemory = new TextView(getApplicationContext());
-            noMemory.setText("No memories Yet! Click on Create Memory to add.");
-            noMemory.setTextColor(getResources().getColor(android.R.color.black));
-            memoryLayout.addView(noMemory);
-        }
-        renderMemories();
+        getMemoriesFromDB();
+    }
+
+    private void getMemoriesFromDB() {
+        final ArrayList<Memory> memories = new ArrayList<>();
+        CollectionReference memoriesCollection = mFirestore.collection("memories");
+        memoriesCollection.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()){
+                    for (DocumentSnapshot document: task.getResult()){
+                        memories.add(document.toObject(Memory.class));
+                    }
+                    Log.d("DATA =======> ",  memories.size()+"");
+                    renderMemories(memories);
+                } else {
+                    Log.d("ERROR =======> ", "error getting documents: ", task.getException());
+                }
+            }
+        });
     }
 
     @Override
@@ -109,7 +128,7 @@ public class AppHomeActivity extends AppCompatActivity {
         if(!memories.isEmpty()) {
             memoryLayout.removeAllViews();
         }
-        renderMemories();
+        getMemoriesFromDB();
         resetNavigation();
     }
 
@@ -125,51 +144,58 @@ public class AppHomeActivity extends AppCompatActivity {
             Memory newMemory = (Memory) intent.getSerializableExtra("ImageMemory");
             memories.add(newMemory);
         }
-        memoryLayout.removeAllViews();
-        renderMemories();
+        getMemoriesFromDB();
         resetNavigation();
     }
 
-    private void renderMemories(){
-        for (Memory memory : memories) {
-            LayoutInflater inflater = LayoutInflater.from(this);
-            LinearLayout linearLayout = null;
-            CardView cardView = null;
-            LinearLayout viewHolder = null;
-            TextView memoryTitle = null;
-            switch(memory.getMemoryType()){
-                case "Memory":
-                    linearLayout = (LinearLayout) inflater.inflate(R.layout.activity_memory_card, null);
-                    cardView = linearLayout.findViewById(R.id.cardView);
+    private void renderMemories(ArrayList<Memory> memories){
+        if (memories.isEmpty()) {
+            noMemory = new TextView(getApplicationContext());
+            noMemory.setText("No memories Yet! Click on Create Memory to add.");
+            noMemory.setTextColor(getResources().getColor(android.R.color.black));
+            memoryLayout.addView(noMemory);
+        } else {
+            memoryLayout.removeAllViews();
+            for (Memory memory : memories) {
+                LayoutInflater inflater = LayoutInflater.from(this);
+                LinearLayout linearLayout = null;
+                CardView cardView = null;
+                LinearLayout viewHolder = null;
+                TextView memoryTitle = null;
+                switch(memory.getMemoryType()){
+                    case "Memory":
+                        linearLayout = (LinearLayout) inflater.inflate(R.layout.activity_memory_card, null);
+                        cardView = linearLayout.findViewById(R.id.cardView);
 
-                    viewHolder = cardView.findViewById(R.id.viewHolder);
-                    memoryTitle = viewHolder.findViewById(R.id.imgMemTitle);
-                    TextView memoryText = viewHolder.findViewById(R.id.memoryText);
+                        viewHolder = cardView.findViewById(R.id.viewHolder);
+                        memoryTitle = viewHolder.findViewById(R.id.imgMemTitle);
+                        TextView memoryText = viewHolder.findViewById(R.id.memoryText);
 
-                    memoryTitle.setText(memory.getMemoryTitle());
-                    memoryText.setText(memory.getMemoryText());
-                    memoryLayout.addView(linearLayout);
-                    break;
-                case "ImageMemory":
-                    linearLayout = (LinearLayout) inflater.inflate(R.layout.activity_image_memory_card, null);
-                    cardView = linearLayout.findViewById(R.id.cardView);
+                        memoryTitle.setText(memory.getMemoryTitle());
+                        memoryText.setText(memory.getMemoryText());
+                        memoryLayout.addView(linearLayout);
+                        break;
+                    case "ImageMemory":
+                        linearLayout = (LinearLayout) inflater.inflate(R.layout.activity_image_memory_card, null);
+                        cardView = linearLayout.findViewById(R.id.cardView);
 
-                    viewHolder = cardView.findViewById(R.id.viewHolder);
-                    memoryTitle = viewHolder.findViewById(R.id.imgMemTitle);
-                    ImageView memoryImage = viewHolder.findViewById(R.id.memoryImage);
+                        viewHolder = cardView.findViewById(R.id.viewHolder);
+                        memoryTitle = viewHolder.findViewById(R.id.imgMemTitle);
+                        ImageView memoryImage = viewHolder.findViewById(R.id.memoryImage);
 
-                    memoryTitle.setText(memory.getMemoryTitle());
-                    Uri imgUri = Uri.parse(memory.getBitMapUri());
-                    try {
-                        Bitmap originalBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imgUri);
-                        Bitmap bitmap = getResizedBitmap(originalBitmap, 200);
-                        memoryImage.setImageBitmap(bitmap);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                        memoryTitle.setText(memory.getMemoryTitle());
+                        Uri imgUri = Uri.parse(memory.getBitMapUri());
+                        try {
+                            Bitmap originalBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imgUri);
+                            Bitmap bitmap = getResizedBitmap(originalBitmap, 200);
+                            memoryImage.setImageBitmap(bitmap);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
 
-                    memoryLayout.addView(linearLayout);
-                    break;
+                        memoryLayout.addView(linearLayout);
+                        break;
+                }
             }
         }
     }

@@ -3,12 +3,14 @@ package edu.oakland.lifestory;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -19,6 +21,17 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import edu.oakland.lifestory.model.Memory;
 
 public class MemoryActivity extends AppCompatActivity {
+    //boolean flag to know if main FAB is in open or closed state.
+    private boolean fabExpanded = false;
+    private FloatingActionButton fabAttach;
+
+    //Linear layout holding the Save submenu
+    private LinearLayout layoutFabImage;
+
+    //Linear layout holding the Edit submenu
+    private LinearLayout layoutFabAudio;
+
+
     EditText memoryTitle, memoryContent = null;
     ImageButton backButton, createMemButton = null;
 
@@ -32,6 +45,29 @@ public class MemoryActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         //Hide the app name
         getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        fabAttach = (FloatingActionButton) this.findViewById(R.id.fabAttach);
+
+        layoutFabImage = (LinearLayout) this.findViewById(R.id.layoutFabImage);
+        layoutFabAudio = (LinearLayout) this.findViewById(R.id.layoutFabAudio);
+
+
+        //When main Fab (Settings) is clicked, it expands if not expanded already.
+        //Collapses if main FAB was open already.
+        //This gives FAB (Settings) open/close behavior
+        fabAttach.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (fabExpanded == true){
+                    closeSubMenusFab();
+                } else {
+                    openSubMenusFab();
+                }
+            }
+        });
+
+        //Only main FAB is visible in the beginning
+        closeSubMenusFab();
 
         backButton = toolbar.findViewById(R.id.backButton);
         backButton.setOnClickListener(new View.OnClickListener() {
@@ -76,5 +112,24 @@ public class MemoryActivity extends AppCompatActivity {
                 v.getContext().startActivity(homeIntent);
             }
         });
+    }
+
+    //closes FAB submenus
+    private void closeSubMenusFab(){
+        layoutFabImage.setVisibility(View.INVISIBLE);
+        layoutFabAudio.setVisibility(View.INVISIBLE);
+
+        fabAttach.setImageResource(R.drawable.ic_attach_file_white_24dp);
+        fabExpanded = false;
+    }
+
+    //Opens FAB submenus
+    private void openSubMenusFab(){
+        layoutFabImage.setVisibility(View.VISIBLE);
+        layoutFabAudio.setVisibility(View.VISIBLE);
+
+        //Change settings icon to 'X' icon
+        fabAttach.setImageResource(R.drawable.ic_close_white_24dp);
+        fabExpanded = true;
     }
 }

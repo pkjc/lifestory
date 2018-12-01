@@ -21,6 +21,9 @@ import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+
+import edu.oakland.lifestory.utils.Constants;
+
 import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 /**
@@ -41,13 +44,10 @@ public class ImageCameraFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 */
-    static final int REQUEST_IMAGE_CAPTURE = 1;
-    static final int PERMISSION_REQUEST_CAMERA = 1;
-    static final int PERMISSION_WRITE_EXTERNAL_STORAGE = 2;
     private OnCameraFragmentInteractionListener mListener;
-    ImageView capturedImage = null;
-    Button clickPicture = null;
-    View view = null;
+    ImageView capturedImage;
+    Button clickPicture;
+    View view;
 
     public ImageCameraFragment() {
         // Required empty public constructor
@@ -92,10 +92,10 @@ public class ImageCameraFragment extends Fragment {
                 if(ContextCompat.checkSelfPermission(getActivity(), CAMERA) == PackageManager.PERMISSION_GRANTED){
                     Intent takePictureIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
                     if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
-                        ImageCameraFragment.this.startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                        ImageCameraFragment.this.startActivityForResult(takePictureIntent, Constants.REQUEST_IMAGE_CAPTURE);
                     }
                 } else {
-                    ActivityCompat.requestPermissions(getActivity(), new String[]{CAMERA},PERMISSION_REQUEST_CAMERA);
+                    ActivityCompat.requestPermissions(getActivity(), new String[]{CAMERA},Constants.PERMISSION_REQUEST_CAMERA);
                 }
             }
         });
@@ -106,14 +106,14 @@ public class ImageCameraFragment extends Fragment {
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults){
         switch (requestCode){
-            case PERMISSION_REQUEST_CAMERA: {
+            case Constants.PERMISSION_REQUEST_CAMERA: {
                 if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(getActivity(), "Permission granted", Toast.LENGTH_SHORT).show();
                 }else{
                     Toast.makeText(getActivity(), "Permission Denied", Toast.LENGTH_LONG).show();
                 }
             }
-            case PERMISSION_WRITE_EXTERNAL_STORAGE:{
+            case Constants.PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE:{
                 if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(getActivity(), "Permission granted", Toast.LENGTH_SHORT).show();
                 }else{
@@ -127,7 +127,7 @@ public class ImageCameraFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data){
         super.onActivityResult(requestCode,resultCode,data);
 
-        if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK){
+        if(requestCode == Constants.REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK){
             Bundle bundle = data.getExtras();
             Bitmap imageBitmap = (Bitmap) bundle.get("data");
             capturedImage.setImageBitmap(imageBitmap);
@@ -145,7 +145,7 @@ public class ImageCameraFragment extends Fragment {
         if(ContextCompat.checkSelfPermission(getActivity(),WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             path = MediaStore.Images.Media.insertImage(getActivity().getContentResolver(), finalBM, null, null);
         } else {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{WRITE_EXTERNAL_STORAGE},PERMISSION_WRITE_EXTERNAL_STORAGE);
+            ActivityCompat.requestPermissions(getActivity(), new String[]{WRITE_EXTERNAL_STORAGE},Constants.PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE);
         }
         return Uri.parse(path);
     }

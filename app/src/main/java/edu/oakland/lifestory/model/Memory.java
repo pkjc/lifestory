@@ -52,7 +52,7 @@ public class Memory implements Serializable {
 
     public Memory() { }
 
-    public Memory(String memoryTitle, String memoryText) {
+    public Memory(String memoryTitle, String memoryText, String bitMapUri) {
         this.memoryTitle = memoryTitle;
         this.memoryText = memoryText;
     }

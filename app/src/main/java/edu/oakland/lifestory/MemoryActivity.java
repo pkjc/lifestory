@@ -2,12 +2,16 @@ package edu.oakland.lifestory;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -24,9 +28,15 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import edu.oakland.lifestory.model.Memory;
+import edu.oakland.lifestory.utils.Constants;
+
+import static android.Manifest.permission.CAMERA;
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class MemoryActivity extends AppCompatActivity {
     //boolean flag to know if main FAB is in open or closed state.
@@ -37,8 +47,8 @@ public class MemoryActivity extends AppCompatActivity {
     //Linear layout holding the Audio submenu
     private LinearLayout layoutFabAudio;
 
-    EditText memoryTitle, memoryContent = null;
-    ImageButton backButton, createMemButton = null;
+    EditText memoryTitle, memoryContent;
+    ImageButton backButton, createMemButton;
     ImageView imageView;
 
     int i;
@@ -84,7 +94,6 @@ public class MemoryActivity extends AppCompatActivity {
                 startActivity(intent);*/
                 //Ask for gallery or camera
                 showImageDialog();
-
             }
         });
         backButton = toolbar.findViewById(R.id.backButton);
@@ -99,6 +108,8 @@ public class MemoryActivity extends AppCompatActivity {
 
         memoryTitle = findViewById(R.id.imgMemTitle);
         memoryContent = findViewById(R.id.memoryContent);
+        imageView = findViewById(R.id.imageView);
+
         createMemButton = toolbar.findViewById(R.id.createMemButton);
 
         createMemButton.setOnClickListener(new View.OnClickListener() {
@@ -106,9 +117,9 @@ public class MemoryActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String memoryTag = memoryTitle.getText().toString();
                 String memoryText = memoryContent.getText().toString();
-
+                Bitmap bitmap = ((BitmapDrawable)imageView.getDrawable()).getBitmap();
                 //Add date and time of creation as well
-                Memory memory = new Memory(memoryTag, memoryText);
+                Memory memory = new Memory(memoryTag, memoryText,getImageUri(bitmap));
                 memory.setMemoryType("Memory");
                 DocumentReference mDocRef = mFirestore.document("memories/memory"+ i);
                 mFirestore.collection("memories").add(memory).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
@@ -154,8 +165,9 @@ public class MemoryActivity extends AppCompatActivity {
         AlertDialog.Builder imageDialog = new AlertDialog.Builder(this);
         imageDialog.setTitle("Select Action");
         String[] imageDialogItems = {
-              "Choose from Gallery",
-              "Capture from Camera"
+              "Choose Photo from Gallery",
+              "Capture Photo from Camera",
+              "Cancel"
             };
         imageDialog.setItems(imageDialogItems, new DialogInterface.OnClickListener() {
             @Override
@@ -167,6 +179,8 @@ public class MemoryActivity extends AppCompatActivity {
                     case 1: //from camera
                            captureImageFromCamera();
                            break;
+                    case 2: //cancel
+                           break;
                 }
             }
         });
@@ -174,13 +188,41 @@ public class MemoryActivity extends AppCompatActivity {
     }
 
     private void chooseImageFromGallery(){
-        Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(galleryIntent,1);
+        if(ContextCompat.checkSelfPermission(this, READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            MemoryActivity.this.startActivityForResult(galleryIntent, Constants.REQUEST_PICK_IMAGE);
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{READ_EXTERNAL_STORAGE},Constants.PERMISSION_REQUEST_READ_EXTERNAL_STORAGE);
+        }
     }
 
     private void captureImageFromCamera(){
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(intent, 2);
+        if(ContextCompat.checkSelfPermission(this, CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            MemoryActivity.this.startActivityForResult(intent, Constants.REQUEST_IMAGE_CAPTURE);
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{CAMERA}, Constants.PERMISSION_REQUEST_CAMERA);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults){
+        switch (requestCode){
+            case Constants.PERMISSION_REQUEST_READ_EXTERNAL_STORAGE:{
+                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(this, "Permission Denied", Toast.LENGTH_LONG).show();
+                }
+            }
+            case Constants.PERMISSION_REQUEST_CAMERA: {
+                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(this, "Permission Denied", Toast.LENGTH_LONG).show();
+                }
+            }
+        }
     }
 
     @Override
@@ -190,30 +232,36 @@ public class MemoryActivity extends AppCompatActivity {
         if(resultCode == this.RESULT_CANCELED){
             return;
         }
-        if(requestCode == 1){
+        if(requestCode == Constants.REQUEST_PICK_IMAGE){
             if(data != null){
                 Uri contentUri = data.getData();
                 try{
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), contentUri);
-                    String path = saveImage(bitmap);
+                    //String path = saveImage(bitmap);
                     Toast.makeText(MemoryActivity.this, "Image Saved!", Toast.LENGTH_SHORT).show();
-                    imageView.setImageBitmap(bitmap);
+                    imageView.setImageBitmap(bitmap.createScaledBitmap(bitmap, bitmap.getWidth(), bitmap.getHeight(), true));
                 } catch(IOException ie){
                     ie.printStackTrace();
                     Toast.makeText(MemoryActivity.this, "Failed!", Toast.LENGTH_SHORT).show();
                 }
             }
-        } else if(requestCode == 2){
-            if(data != null){
+        } else if(requestCode == Constants.REQUEST_IMAGE_CAPTURE){
                 Bitmap thumbnail = (Bitmap)data.getExtras().get("data");
                 imageView.setImageBitmap(thumbnail);
-                saveImage(thumbnail);
+                //saveImage(thumbnail);
                 Toast.makeText(MemoryActivity.this, "Image Saved!", Toast.LENGTH_SHORT).show();
-            }
         }
     }
 
-    private String saveImage(Bitmap bitmap){
-    return "";
+    private String getImageUri(Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = "";
+        if(ContextCompat.checkSelfPermission(this,WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            path = MediaStore.Images.Media.insertImage(this.getContentResolver(), inImage, null, null);
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{WRITE_EXTERNAL_STORAGE},Constants.PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE);
+        }
+        return Uri.parse(path).toString();
     }
 }

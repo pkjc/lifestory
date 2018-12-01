@@ -125,14 +125,14 @@ public class ImageMemoryActivity extends AppCompatActivity implements ImageGalle
 
     @Override
     public void setImageBitmapUri(String bitmapUri) {
-        //get the bitmap uri and add to list for home screen
-        imgMemory = new Memory("Temp", bitmapUri, 0);
+        //get the bitmap uri and add to list for home screen, title will be set when adding
+        imgMemory = new Memory("", bitmapUri);
     }
 
     @Override
     public void setCameraImageBmUri(String uri) {
-        //get the bitmap uri and add to list for home screen
-        imgMemory = new Memory("Temp", uri, 0);
+        //get the bitmap uri and add to list for home screen, title will be set when adding
+        imgMemory = new Memory("", uri);
     }
 
 

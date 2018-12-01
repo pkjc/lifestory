@@ -30,6 +30,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Date;
 
 import edu.oakland.lifestory.model.Memory;
 import edu.oakland.lifestory.utils.Constants;
@@ -117,9 +118,14 @@ public class MemoryActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String memoryTag = memoryTitle.getText().toString();
                 String memoryText = memoryContent.getText().toString();
-                Bitmap bitmap = ((BitmapDrawable)imageView.getDrawable()).getBitmap();
+
                 //Add date and time of creation as well
-                Memory memory = new Memory(memoryTag, memoryText,getImageUri(bitmap));
+                Memory memory = new Memory(memoryTag, memoryText);
+                if(imageView.getDrawable() != null && ((BitmapDrawable)imageView.getDrawable()).getBitmap() != null) {
+                    Bitmap bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+                    memory.setBitMapUri(getImageUri(bitmap));
+                }
+                memory.setMemoryCreateDate(new Date());
                 memory.setMemoryType("Memory");
                 DocumentReference mDocRef = mFirestore.document("memories/memory"+ i);
                 mFirestore.collection("memories").add(memory).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {

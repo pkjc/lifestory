@@ -27,6 +27,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.IOException;
+import java.text.DateFormat;
 import java.util.ArrayList;
 
 import edu.oakland.lifestory.model.Memory;
@@ -34,11 +35,12 @@ import edu.oakland.lifestory.model.Memory;
 public class AppHomeActivity extends AppCompatActivity {
 
     private TextView mTextMessage;
-    private TextView noMemory = null;
+    private TextView noMemory;
     ArrayList<Memory> memories = new ArrayList<Memory>();
-    LinearLayout memoryLayout = null;
+    LinearLayout memoryLayout;
     ImageButton backButton, quickCreateText, quickCreateImage, quickCreateAudio;
-    BottomNavigationView navigation = null;
+
+    BottomNavigationView navigation;
     private FirebaseFirestore mFirestore = FirebaseFirestore.getInstance();
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -162,6 +164,7 @@ public class AppHomeActivity extends AppCompatActivity {
                 CardView cardView = null;
                 LinearLayout viewHolder = null;
                 TextView memoryTitle = null;
+                ImageView memoryImage = null;
                 switch(memory.getMemoryType()){
                     case "Memory":
                         linearLayout = (LinearLayout) inflater.inflate(R.layout.activity_memory_card, null);
@@ -169,10 +172,19 @@ public class AppHomeActivity extends AppCompatActivity {
 
                         viewHolder = cardView.findViewById(R.id.viewHolder);
                         memoryTitle = viewHolder.findViewById(R.id.imgMemTitle);
-                        TextView memoryText = viewHolder.findViewById(R.id.memoryText);
+                        //TextView memoryText = viewHolder.findViewById(R.id.memoryText);
+                        TextView createDate = viewHolder.findViewById(R.id.createDate);
+                        memoryImage = viewHolder.findViewById(R.id.memoryImage);
 
                         memoryTitle.setText(memory.getMemoryTitle());
-                        memoryText.setText(memory.getMemoryText());
+                        //memoryText.setText(memory.getMemoryText());
+                        if(memory.getMemoryCreateDate() != null) {
+                            String formatDate = DateFormat.getDateTimeInstance().format(memory.getMemoryCreateDate());
+                            createDate.setText(formatDate);
+                        }
+                        if(memory.getBitMapUri() != null){
+                            memoryImage.setImageURI(Uri.parse(memory.getBitMapUri()));
+                        }
                         memoryLayout.addView(linearLayout);
                         break;
                     case "ImageMemory":
@@ -181,16 +193,18 @@ public class AppHomeActivity extends AppCompatActivity {
 
                         viewHolder = cardView.findViewById(R.id.viewHolder);
                         memoryTitle = viewHolder.findViewById(R.id.imgMemTitle);
-                        ImageView memoryImage = viewHolder.findViewById(R.id.memoryImage);
+                        memoryImage = viewHolder.findViewById(R.id.memoryImage);
 
                         memoryTitle.setText(memory.getMemoryTitle());
-                        Uri imgUri = Uri.parse(memory.getBitMapUri());
-                        try {
-                            Bitmap originalBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imgUri);
-                            Bitmap bitmap = getResizedBitmap(originalBitmap, 200);
-                            memoryImage.setImageBitmap(bitmap);
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                        if(memory.getBitMapUri() != null) {
+                            Uri imgUri = Uri.parse(memory.getBitMapUri());
+                            try {
+                                Bitmap originalBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imgUri);
+                                Bitmap bitmap = getResizedBitmap(originalBitmap, 200);
+                                memoryImage.setImageBitmap(bitmap);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         }
 
                         memoryLayout.addView(linearLayout);

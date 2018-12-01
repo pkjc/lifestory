@@ -20,29 +20,34 @@
             android:id="@+id/viewHolder"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:orientation="horizontal"
             android:padding="5dp">
 
             <TextView
-                android:id="@+id/imgMemTitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="fill_horizontal"
-                android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:id="@+id/createDate"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_weight="1" android:layout_gravity="fill"
+                android:textAppearance="@android:style/TextAppearance.Material.Widget.TextView"></TextView>
 
             <TextView
+                android:id="@+id/imgMemTitle"
+                android:layout_width="0dp" android:layout_weight="1"
+                android:layout_height="100dp"
+                android:layout_gravity="fill"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                />
+            <ImageView android:id="@+id/memoryImage"
+                android:layout_width="0dp" android:layout_weight="1"
+                android:layout_height="100dp" android:layout_gravity="fill"/>
+            <!--<TextView
                 android:id="@+id/memoryText"
-                android:layout_width="match_parent"
+                android:layout_width="0dp" android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:layout_gravity="fill_horizontal"
                 android:layout_marginTop="8dp"
-                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/imgMemTitle" />
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1" /> -->
+
         </LinearLayout>
     </android.support.v7.widget.CardView>
 

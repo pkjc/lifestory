@@ -62,6 +62,8 @@ public class ImageMemoryActivity extends AppCompatActivity implements ImageGalle
         //enable below and add tab title
         //tabLayout.setupWithViewPager(mViewPager);
 
+        Intent intent = getIntent();
+        String requestFrom = intent.getStringExtra("RequestFrom");
         backButton = toolbar.findViewById(R.id.backButton);
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -123,14 +125,14 @@ public class ImageMemoryActivity extends AppCompatActivity implements ImageGalle
 
     @Override
     public void setImageBitmapUri(String bitmapUri) {
-        //get the bitmap uri and add to list for home screen
-        imgMemory = new Memory("Temp", bitmapUri, 0);
+        //get the bitmap uri and add to list for home screen, title will be set when adding
+        imgMemory = new Memory("", bitmapUri);
     }
 
     @Override
     public void setCameraImageBmUri(String uri) {
-        //get the bitmap uri and add to list for home screen
-        imgMemory = new Memory("Temp", uri, 0);
+        //get the bitmap uri and add to list for home screen, title will be set when adding
+        imgMemory = new Memory("", uri);
     }
 
 

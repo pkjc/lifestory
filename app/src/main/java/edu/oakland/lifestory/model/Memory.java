@@ -1,14 +1,15 @@
 package edu.oakland.lifestory.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 public class Memory implements Serializable {
 
     private String memoryTitle;
     private String memoryText;
     private String memoryType;
-    private int imgBitmap;
     private String bitMapUri;
+    private Date memoryCreateDate;
 
     public String getBitMapUri() {
         return bitMapUri;
@@ -16,14 +17,6 @@ public class Memory implements Serializable {
 
     public void setBitMapUri(String bitMapUri) {
         this.bitMapUri = bitMapUri;
-    }
-
-    public int getImgBitmap() {
-        return imgBitmap;
-    }
-
-    public void setImgBitmap(int imgBitmap) {
-        this.imgBitmap = imgBitmap;
     }
 
     public String getMemoryType() {
@@ -50,6 +43,14 @@ public class Memory implements Serializable {
         this.memoryText = memoryText;
     }
 
+    public Date getMemoryCreateDate() {
+        return memoryCreateDate;
+    }
+
+    public void setMemoryCreateDate(Date memoryCreateDate) {
+        this.memoryCreateDate = memoryCreateDate;
+    }
+
     public Memory() { }
 
     public Memory(String memoryTitle, String memoryText) {
@@ -57,9 +58,8 @@ public class Memory implements Serializable {
         this.memoryText = memoryText;
     }
 
-    public Memory(String memoryTitle, String bitmapUri, int bitmap){
+    /*public Memory(String memoryTitle, String bitmapUri){
         this.memoryTitle = memoryTitle;
         this.bitMapUri = bitmapUri;
-        this.imgBitmap = bitmap;
-    }
+    }*/
 }

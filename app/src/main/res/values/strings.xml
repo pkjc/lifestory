@@ -15,7 +15,7 @@
     <string name="title_home">Home</string>
     <string name="title_calendar">Calendar</string>
     <string name="title_notifications">Notifications</string>
-    <string name="title_create">Create Memory</string>
+    <string name="title_create">Create</string>
     <string name="title_search">Search</string>
     <string name="loading">Loading…</string>
     <string name="log_error_occurred">"Error occurred: "</string>

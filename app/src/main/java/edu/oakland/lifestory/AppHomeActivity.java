@@ -169,7 +169,6 @@ public class AppHomeActivity extends AppCompatActivity {
                     case "Memory":
                         linearLayout = (LinearLayout) inflater.inflate(R.layout.activity_memory_card, null);
                         cardView = linearLayout.findViewById(R.id.cardView);
-
                         viewHolder = cardView.findViewById(R.id.viewHolder);
                         memoryTitle = viewHolder.findViewById(R.id.imgMemTitle);
                         //TextView memoryText = viewHolder.findViewById(R.id.memoryText);

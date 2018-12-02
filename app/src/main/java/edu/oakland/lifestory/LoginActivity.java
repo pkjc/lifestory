@@ -78,8 +78,13 @@ public class LoginActivity extends BaseActivity implements GoogleApiClient.Conne
                 //if user is signed in, we call a helper method to save the user details to Firebase
                 if (user != null) {
                     // User is signed in
-                    createUserInFirebaseHelper();
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                    //createUserInFirebaseHelper();
+//                    Toast.makeText(LoginActivity.this, "Login successful",
+//                            Toast.LENGTH_SHORT).show();
+//                    Intent intent = new Intent(LoginActivity.this, AppHomeActivity.class);
+//                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//                    startActivity(intent);
+//                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                 } else {
                     // User is signed out
                     Log.d(TAG, "onAuthStateChanged:signed_out");
@@ -137,7 +142,7 @@ public class LoginActivity extends BaseActivity implements GoogleApiClient.Conne
 
     // This method configures Google SignIn
     public void configureSignIn() {
-    // Configure sign-in to request the user's basic profile like name and email
+        // Configure sign-in to request the user's basic profile like name and email
         GoogleSignInOptions options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(LoginActivity.this.getResources().getString(R.string.web_client_id))
                 .requestEmail()
@@ -214,7 +219,7 @@ public class LoginActivity extends BaseActivity implements GoogleApiClient.Conne
                             Toast.makeText(LoginActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
                         } else {
-                            createUserInFirebaseHelper();
+                            //createUserInFirebaseHelper();
                             Toast.makeText(LoginActivity.this, "Login successful",
                                     Toast.LENGTH_SHORT).show();
                             Intent intent = new Intent(LoginActivity.this, AppHomeActivity.class);
@@ -261,7 +266,6 @@ public class LoginActivity extends BaseActivity implements GoogleApiClient.Conne
         int id = view.getId();
 
         if (id == R.id.login_with_google) {
-            Toast.makeText(LoginActivity.this, "Hello!", Toast.LENGTH_LONG).show();
             if (utils.isNetworkAvailable()) {
                 signIn();
             } else {
@@ -272,6 +276,6 @@ public class LoginActivity extends BaseActivity implements GoogleApiClient.Conne
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
+        Toast.makeText(LoginActivity.this, "OnConnectionFailed!", Toast.LENGTH_SHORT).show();
     }
 }

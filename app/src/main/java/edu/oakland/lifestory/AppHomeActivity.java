@@ -30,6 +30,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import edu.oakland.lifestory.model.Memory;
 
@@ -195,14 +196,23 @@ public class AppHomeActivity extends AppCompatActivity {
                         viewHolder = cardView.findViewById(R.id.viewHolder);
                         memoryTitle = viewHolder.findViewById(R.id.imgMemTitle);
                         //TextView memoryText = viewHolder.findViewById(R.id.memoryText);
+
                         TextView createDate = viewHolder.findViewById(R.id.createDate);
+                        TextView createDate1 = viewHolder.findViewById(R.id.createDate1);
+                        TextView createDate2 = viewHolder.findViewById(R.id.createDate2);
+
                         memoryImage = viewHolder.findViewById(R.id.memoryImage);
 
                         memoryTitle.setText(memory.getMemoryTitle());
                         //memoryText.setText(memory.getMemoryText());
                         if(memory.getMemoryCreateDate() != null) {
-                            String formatDate = DateFormat.getDateTimeInstance().format(memory.getMemoryCreateDate());
-                            createDate.setText(formatDate);
+                            String formatDate = DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.US).format(memory.getMemoryCreateDate());
+
+                            String[] dateSeparated = formatDate.split("\\s+");
+
+                            createDate.setText(dateSeparated[0]);
+                            createDate1.setText(dateSeparated[1].replace(",", ""));
+                            createDate2.setText(dateSeparated[2]);
                         }
                         if(memory.getBitMapUri() != null){
                             memoryImage.setImageURI(Uri.parse(memory.getBitMapUri()));

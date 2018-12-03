@@ -79,12 +79,11 @@ public class LoginActivity extends BaseActivity implements GoogleApiClient.Conne
                 if (user != null) {
                     // User is signed in
                     //createUserInFirebaseHelper();
-//                    Toast.makeText(LoginActivity.this, "Login successful",
-//                            Toast.LENGTH_SHORT).show();
-//                    Intent intent = new Intent(LoginActivity.this, AppHomeActivity.class);
-//                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//                    startActivity(intent);
-//                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                    //Toast.makeText(LoginActivity.this, "User already signed in", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(LoginActivity.this, AppHomeActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                 } else {
                     // User is signed out
                     Log.d(TAG, "onAuthStateChanged:signed_out");

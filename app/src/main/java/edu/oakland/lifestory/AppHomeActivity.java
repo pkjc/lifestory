@@ -21,9 +21,10 @@ import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.IOException;
@@ -42,6 +43,8 @@ public class AppHomeActivity extends AppCompatActivity {
 
     BottomNavigationView navigation;
     private FirebaseFirestore mFirestore = FirebaseFirestore.getInstance();
+    private FirebaseAuth mAuth;
+    private String current_user_id;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -79,6 +82,9 @@ public class AppHomeActivity extends AppCompatActivity {
         quickCreateImage = toolbar.findViewById(R.id.quickCreateImage);
         quickCreateAudio = toolbar.findViewById(R.id.quickCreateAudio);
 
+        mAuth = FirebaseAuth.getInstance();
+        current_user_id = mAuth.getCurrentUser().getUid();
+
         //For home screen disable back button
         backButton.setVisibility(View.INVISIBLE);
         quickCreateText.setOnClickListener(new View.OnClickListener() {
@@ -107,8 +113,10 @@ public class AppHomeActivity extends AppCompatActivity {
 
     private void getMemoriesFromDB() {
         final ArrayList<Memory> memories = new ArrayList<>();
-        CollectionReference memoriesCollection = mFirestore.collection("memories");
-        memoriesCollection.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        //CollectionReference memoriesCollection = mFirestore.collection("memories");
+        Query query = mFirestore.collection("memories").whereEqualTo("userId", current_user_id);
+
+        query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()){
@@ -122,6 +130,21 @@ public class AppHomeActivity extends AppCompatActivity {
                 }
             }
         });
+
+//        memoriesCollection.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//            @Override
+//            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                if (task.isSuccessful()){
+//                    for (DocumentSnapshot document: task.getResult()){
+//                        memories.add(document.toObject(Memory.class));
+//                    }
+//                    Log.d("DATA =======> ",  memories.size()+"");
+//                    renderMemories(memories);
+//                } else {
+//                    Log.d("ERROR =======> ", "error getting documents: ", task.getException());
+//                }
+//            }
+//        });
     }
 
     @Override

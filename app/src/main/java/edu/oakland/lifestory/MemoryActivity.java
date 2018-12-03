@@ -74,7 +74,6 @@ public class MemoryActivity extends AppCompatActivity {
         fabAudio = (FloatingActionButton) this.findViewById(R.id.fabAudio);
 
         mAuth = FirebaseAuth.getInstance();
-
         current_user_id = mAuth.getCurrentUser().getUid();
 
         //When main Fab (Attach) is clicked, it expands if not expanded already.

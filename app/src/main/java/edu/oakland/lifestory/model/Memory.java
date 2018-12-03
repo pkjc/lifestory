@@ -10,6 +10,15 @@ public class Memory implements Serializable {
     private String memoryType;
     private String bitMapUri;
     private Date memoryCreateDate;
+    private String userId;
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
     public String getBitMapUri() {
         return bitMapUri;

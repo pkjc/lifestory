@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -54,6 +55,8 @@ public class MemoryActivity extends AppCompatActivity {
 
     int i;
     private FirebaseFirestore mFirestore = FirebaseFirestore.getInstance();
+    private FirebaseAuth mAuth;
+    private String current_user_id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +72,10 @@ public class MemoryActivity extends AppCompatActivity {
         layoutFabAudio = (LinearLayout) this.findViewById(R.id.layoutFabAudio);
         fabImage = (FloatingActionButton) this.findViewById(R.id.fabImage);
         fabAudio = (FloatingActionButton) this.findViewById(R.id.fabAudio);
+
+        mAuth = FirebaseAuth.getInstance();
+
+        current_user_id = mAuth.getCurrentUser().getUid();
 
         //When main Fab (Attach) is clicked, it expands if not expanded already.
         //Collapses if main FAB was open already.
@@ -121,12 +128,15 @@ public class MemoryActivity extends AppCompatActivity {
 
                 //Add date and time of creation as well
                 Memory memory = new Memory(memoryTag, memoryText);
+
                 if(imageView.getDrawable() != null && ((BitmapDrawable)imageView.getDrawable()).getBitmap() != null) {
                     Bitmap bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
                     memory.setBitMapUri(getImageUri(bitmap));
                 }
                 memory.setMemoryCreateDate(new Date());
                 memory.setMemoryType("Memory");
+                memory.setUserId(current_user_id);
+
                 DocumentReference mDocRef = mFirestore.document("memories/memory"+ i);
                 mFirestore.collection("memories").add(memory).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
                     private static final String TAG = "MemoryActivity";

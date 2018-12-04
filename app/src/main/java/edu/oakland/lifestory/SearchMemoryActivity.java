@@ -36,8 +36,12 @@ public class SearchMemoryActivity extends AppCompatActivity {
         calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
             @Override
             public void onSelectedDayChange(CalendarView view, int year, int month, int dayOfMonth) {
+                long selectedDate = calendarView.getDate();
                 Toast.makeText(SearchMemoryActivity.this, (month+1)+"/"+dayOfMonth+"/"+year, Toast.LENGTH_SHORT).show();
-
+                Intent searchMemory = new Intent("edu.oakland.lifestory.ReturnHome");
+                searchMemory.putExtra("SearchMemory", "SearchMemory");
+                searchMemory.putExtra("SelectedDate", selectedDate);
+                SearchMemoryActivity.this.startActivity(searchMemory);
             }
         });
     }

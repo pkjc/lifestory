@@ -79,7 +79,7 @@ public class MemoryActivity extends AppCompatActivity {
 
         //When main Fab (Attach) is clicked, it expands if not expanded already.
         //Collapses if main FAB was open already.
-        //This gives FAB (Settings) open/close behavior
+        //This gives FAB (Attachment) open/close behavior
         fabAttach.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

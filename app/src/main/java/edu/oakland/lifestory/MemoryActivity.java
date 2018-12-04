@@ -79,7 +79,7 @@ public class MemoryActivity extends AppCompatActivity {
 
         //When main Fab (Attach) is clicked, it expands if not expanded already.
         //Collapses if main FAB was open already.
-        //This gives FAB (Settings) open/close behavior
+        //This gives FAB (Attachment) open/close behavior
         fabAttach.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -96,11 +96,7 @@ public class MemoryActivity extends AppCompatActivity {
         fabImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //navigate to create image memory screen
-                /*Intent intent = new Intent(MemoryActivity.this, ImageMemoryActivity.class);
-                intent.putExtra("RequestFrom", "Memory");
-                startActivity(intent);*/
-                //Ask for gallery or camera
+                //Action to choose gallery or camera
                 showImageDialog();
             }
         });
@@ -263,8 +259,7 @@ public class MemoryActivity extends AppCompatActivity {
                 Uri contentUri = data.getData();
                 try{
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), contentUri);
-                    //String path = saveImage(bitmap);
-                    Toast.makeText(MemoryActivity.this, "Image Saved!", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(MemoryActivity.this, "Image Saved!", Toast.LENGTH_SHORT).show();
                     imageView.setImageBitmap(bitmap.createScaledBitmap(bitmap, bitmap.getWidth(), bitmap.getHeight(), true));
                 } catch(IOException ie){
                     ie.printStackTrace();
@@ -274,7 +269,6 @@ public class MemoryActivity extends AppCompatActivity {
         } else if(requestCode == Constants.REQUEST_IMAGE_CAPTURE){
                 Bitmap thumbnail = (Bitmap)data.getExtras().get("data");
                 imageView.setImageBitmap(thumbnail);
-                //saveImage(thumbnail);
                 Toast.makeText(MemoryActivity.this, "Image Saved!", Toast.LENGTH_SHORT).show();
         }
     }

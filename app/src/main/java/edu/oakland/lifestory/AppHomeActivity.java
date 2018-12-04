@@ -47,6 +47,16 @@ public class AppHomeActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private String current_user_id;
 
+    public long getSearchDate() {
+        return searchDate;
+    }
+
+    public void setSearchDate(long searchDate) {
+        this.searchDate = searchDate;
+    }
+
+    private long searchDate;
+
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
@@ -66,6 +76,8 @@ public class AppHomeActivity extends AppCompatActivity {
                     startActivity(sentiMentAnalysisIntent);
                      return true;
                 case R.id.navigation_calendar:
+                     Intent searchIntent = new Intent("edu.oakland.lifestory.SearchMemory");
+                     startActivity(searchIntent);
                      return true;
             }
             return false;
@@ -86,7 +98,8 @@ public class AppHomeActivity extends AppCompatActivity {
         quickCreateAudio = toolbar.findViewById(R.id.quickCreateAudio);
 
         mAuth = FirebaseAuth.getInstance();
-        current_user_id = mAuth.getCurrentUser().getUid();
+        //current_user_id = mAuth.getCurrentUser().getUid();
+        current_user_id = "AjKLJ0N8p5at5fsnSLLuHuPL2Zr1";
 
         //For home screen disable back button
         backButton.setVisibility(View.INVISIBLE);
@@ -171,6 +184,10 @@ public class AppHomeActivity extends AppCompatActivity {
         } else if(intent.hasExtra("ImageMemory")){
             Memory newMemory = (Memory) intent.getSerializableExtra("ImageMemory");
             memories.add(newMemory);
+        } else if (intent.hasExtra("SearchMemory")){
+            //get the selected date from intent, call db query.
+            setSearchDate((long) intent.getLongExtra("SelectedDate", 0));
+            getMemoriesFromDB();
         }
         getMemoriesFromDB();
         resetNavigation();

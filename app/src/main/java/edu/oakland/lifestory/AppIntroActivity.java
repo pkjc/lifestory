@@ -7,7 +7,7 @@ import android.view.View;
 import android.widget.Button;
 
 public class AppIntroActivity extends AppCompatActivity {
-    Button createMemButton, skipButton = null;
+    Button createMemButton, skipButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

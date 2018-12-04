@@ -66,6 +66,8 @@ public class AppHomeActivity extends AppCompatActivity {
                     startActivity(sentiMentAnalysisIntent);
                      return true;
                 case R.id.navigation_calendar:
+                     Intent searchIntent = new Intent("edu.oakland.lifestory.SearchMemory");
+                     startActivity(searchIntent);
                      return true;
             }
             return false;
@@ -86,7 +88,8 @@ public class AppHomeActivity extends AppCompatActivity {
         quickCreateAudio = toolbar.findViewById(R.id.quickCreateAudio);
 
         mAuth = FirebaseAuth.getInstance();
-        current_user_id = mAuth.getCurrentUser().getUid();
+        //current_user_id = mAuth.getCurrentUser().getUid();
+        current_user_id = "AjKLJ0N8p5at5fsnSLLuHuPL2Zr1";
 
         //For home screen disable back button
         backButton.setVisibility(View.INVISIBLE);

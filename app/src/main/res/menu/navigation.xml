@@ -28,10 +28,9 @@
     <item
         android:id="@+id/navigation_dashboard"
         android:enabled="true"
-        android:icon="@drawable/ic_dashboard_black_24dp"
-
-        android:title="Dashboard"
-        app:showAsAction="ifRoom"/>
+        android:icon="@android:drawable/ic_menu_compass"
+        android:title="Mood"
+        app:showAsAction="ifRoom" />
     <item
         android:id="@+id/navigation_calendar"
         android:enabled="true"

@@ -7,6 +7,8 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.ImageButton;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -26,6 +28,9 @@ import com.ibm.watson.developer_cloud.service.security.IamOptions;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.oakland.lifestory.model.Memory;
 import edu.oakland.lifestory.model.Sentiment;
 
@@ -35,6 +40,9 @@ public class SentimentAnalysisActivity extends BaseActivity {
     private FirebaseFirestore mFirestore = FirebaseFirestore.getInstance();
     private FirebaseAuth mAuth;
     private String current_user_id;
+    WebView webView;
+    static WebViewBridge bridge;
+    List<Sentiment> sentimentList = new ArrayList<>();
 
     private class AskWatsonTask extends AsyncTask<String, Void, Sentiment> {
         private static final String TAG = "AskWatsonTask";
@@ -59,7 +67,7 @@ public class SentimentAnalysisActivity extends BaseActivity {
                     .emotion(emotionOps)
                     .build();
 
-            AnalyzeOptions parameters = new AnalyzeOptions.Builder()
+            AnalyzeOptions parameters = new AnalyzeOptions.Builder().language("English")
                     .text(textsToAnalyze[0])
                     .features(features)
                     .build();
@@ -88,7 +96,8 @@ public class SentimentAnalysisActivity extends BaseActivity {
         protected void onPostExecute(Sentiment result) {
             hideProgressDialog();
             Log.d(TAG, "onPostExecute: " + result.getAnger() + result.getAnger() + result.getAnger() + result.getAnger() + result.getAnger());
-
+            sentimentList.add(result);
+            plotGraph(sentimentList);
         }
     }
 
@@ -101,11 +110,33 @@ public class SentimentAnalysisActivity extends BaseActivity {
         current_user_id = mAuth.getCurrentUser().getUid();
 
         handleBackBtn();
+
         getMemoriesFromDB();
     }
 
+    private void plotGraph(final List<Sentiment> sentimentList) {
+        webView = findViewById(R.id. webView);
+        webView.getSettings().setJavaScriptEnabled(true);
+
+        bridge = new WebViewBridge(webView);
+        webView.addJavascriptInterface(bridge, "Android");
+
+        /* WebViewClient must be set BEFORE calling loadUrl! */
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                int i = 0;
+                for(Sentiment sentiment : sentimentList){
+                    bridge.addDataToWebView(sentiment.getAnger(), "" + i);
+                    i++;
+                }
+            }
+        });
+        webView.loadUrl("file:///android_asset/index.html");
+    }
+
     private void getMemoriesFromDB() {
-        //final ArrayList<Memory> memories = new ArrayList<>();
+        final ArrayList<Memory> memories = new ArrayList<>();
         //CollectionReference memoriesCollection = mFirestore.collection("memories");
         Query query = mFirestore.collection("memories").whereEqualTo("userId", current_user_id);
 
@@ -114,9 +145,9 @@ public class SentimentAnalysisActivity extends BaseActivity {
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()){
                     for (DocumentSnapshot document: task.getResult()){
-                        //memories.add(document.toObject(Memory.class));
-                        startWatsonTask(document.toObject(Memory.class));
+                        memories.add(document.toObject(Memory.class));
                     }
+                    startWatsonTask(memories.get(0));
                     //Log.d("DATA =======> ",  memories.size()+"");
 
                 } else {

@@ -62,6 +62,8 @@ public class AppHomeActivity extends AppCompatActivity {
                      startActivity(intent);
                      return true;
                 case R.id.navigation_dashboard:
+                    Intent sentiMentAnalysisIntent = new Intent("edu.oakland.lifestory.SentimentAnalysisActivity");
+                    startActivity(sentiMentAnalysisIntent);
                      return true;
                 case R.id.navigation_calendar:
                      return true;

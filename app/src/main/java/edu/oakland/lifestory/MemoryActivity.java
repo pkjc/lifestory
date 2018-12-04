@@ -32,6 +32,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Date;
+import java.util.UUID;
 
 import edu.oakland.lifestory.model.Memory;
 import edu.oakland.lifestory.utils.Constants;
@@ -136,6 +137,8 @@ public class MemoryActivity extends AppCompatActivity {
                 memory.setMemoryType("Memory");
                 memory.setUserId(current_user_id);
 
+                handleMemoryImgUpload();
+
                 DocumentReference mDocRef = mFirestore.document("memories/memory"+ i);
                 mFirestore.collection("memories").add(memory).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
                     private static final String TAG = "MemoryActivity";
@@ -155,6 +158,14 @@ public class MemoryActivity extends AppCompatActivity {
                 homeIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 homeIntent.putExtra("Memory", memory);
                 v.getContext().startActivity(homeIntent);
+            }
+
+            private void handleMemoryImgUpload() {
+
+                final String randomName = UUID.randomUUID().toString();
+
+                //File newImageFile = new File(memory.get.getPath());
+
             }
         });
     }

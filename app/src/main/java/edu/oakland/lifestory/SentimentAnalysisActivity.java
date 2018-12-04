@@ -15,22 +15,24 @@ import com.ibm.watson.developer_cloud.natural_language_understanding.v1.model.Em
 import com.ibm.watson.developer_cloud.natural_language_understanding.v1.model.Features;
 import com.ibm.watson.developer_cloud.service.security.IamOptions;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import edu.oakland.lifestory.model.Sentiment;
 
 public class SentimentAnalysisActivity extends BaseActivity {
 
-    String sentiment;
+    Sentiment sentiment = new Sentiment();
 
-    private class AskWatsonTask extends AsyncTask<String, Void, String> {
+    private class AskWatsonTask extends AsyncTask<String, Void, Sentiment> {
         private static final String TAG = "AskWatsonTask";
         @Override
-        protected String doInBackground(String... textsToAnalyze) {
+        protected Sentiment doInBackground(String... textsToAnalyze) {
 
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    //Msg to show while fetching from API
+                    showProgressDialog();
                 }
             });
 
@@ -39,22 +41,20 @@ public class SentimentAnalysisActivity extends BaseActivity {
             NaturalLanguageUnderstanding service = new NaturalLanguageUnderstanding("2018-03-16", options);
             service.setEndPoint("https://gateway-wdc.watsonplatform.net/natural-language-understanding/api");
 
-            String html = "Fruits Apples and Oranges I love apples! I don't like oranges.";
+            String text = "Fruits Apples and Oranges I love apples! I don't like oranges.";
 
-            List<String> targets = new ArrayList<>();
-            targets.add("apples");
-            targets.add("oranges");
+//            List<String> targets = new ArrayList<>();
+//            targets.add("apples");
+//            targets.add("oranges");
 
-            EmotionOptions emotion= new EmotionOptions.Builder()
-                    .targets(targets)
-                    .build();
+            EmotionOptions emotionOps = new EmotionOptions.Builder().build();
 
             Features features = new Features.Builder()
-                    .emotion(emotion)
+                    .emotion(emotionOps)
                     .build();
 
             AnalyzeOptions parameters = new AnalyzeOptions.Builder()
-                    .text(html)
+                    .text(textsToAnalyze[0])
                     .features(features)
                     .build();
 
@@ -63,14 +63,23 @@ public class SentimentAnalysisActivity extends BaseActivity {
                     .execute();
             System.out.println(response);
 
-
-            sentiment = "Test sentiment";
-
-            return response.getEmotion().toString();
+            try {
+                JSONObject reader = new JSONObject(response.getEmotion().toString());
+                JSONObject emotion  = reader.getJSONObject("document").getJSONObject("emotion");
+                sentiment.setAnger(emotion.getString("anger"));
+                sentiment.setDisgust(emotion.getString("disgust"));
+                sentiment.setFear(emotion.getString("fear"));
+                sentiment.setJoy(emotion.getString("joy"));
+                sentiment.setSadness(emotion.getString("sadness"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return sentiment;
         }
 
         @Override
-        protected void onPostExecute(String result) {
+        protected void onPostExecute(Sentiment result) {
+            hideProgressDialog();
             Log.d(TAG, "onPostExecute: " + result);
         }
     }
@@ -79,12 +88,11 @@ public class SentimentAnalysisActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sentiment_analysis);
-
         handleBackBtn();
 
         AskWatsonTask task = new AskWatsonTask();
-        task.execute(new String[]{});
-
+        String[] textsToAnalyze = {"Fruits Apples and Oranges I love apples! I don't like oranges."};
+        task.execute(textsToAnalyze);
     }
 
     private void handleBackBtn() {
@@ -100,3 +108,4 @@ public class SentimentAnalysisActivity extends BaseActivity {
         });
     }
 }
+

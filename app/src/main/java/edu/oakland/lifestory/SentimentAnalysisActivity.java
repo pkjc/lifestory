@@ -3,11 +3,19 @@ package edu.oakland.lifestory;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.ibm.watson.developer_cloud.natural_language_understanding.v1.NaturalLanguageUnderstanding;
 import com.ibm.watson.developer_cloud.natural_language_understanding.v1.model.AnalysisResults;
 import com.ibm.watson.developer_cloud.natural_language_understanding.v1.model.AnalyzeOptions;
@@ -18,11 +26,15 @@ import com.ibm.watson.developer_cloud.service.security.IamOptions;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import edu.oakland.lifestory.model.Memory;
 import edu.oakland.lifestory.model.Sentiment;
 
 public class SentimentAnalysisActivity extends BaseActivity {
 
     Sentiment sentiment = new Sentiment();
+    private FirebaseFirestore mFirestore = FirebaseFirestore.getInstance();
+    private FirebaseAuth mAuth;
+    private String current_user_id;
 
     private class AskWatsonTask extends AsyncTask<String, Void, Sentiment> {
         private static final String TAG = "AskWatsonTask";
@@ -41,12 +53,6 @@ public class SentimentAnalysisActivity extends BaseActivity {
             NaturalLanguageUnderstanding service = new NaturalLanguageUnderstanding("2018-03-16", options);
             service.setEndPoint("https://gateway-wdc.watsonplatform.net/natural-language-understanding/api");
 
-            String text = "Fruits Apples and Oranges I love apples! I don't like oranges.";
-
-//            List<String> targets = new ArrayList<>();
-//            targets.add("apples");
-//            targets.add("oranges");
-
             EmotionOptions emotionOps = new EmotionOptions.Builder().build();
 
             Features features = new Features.Builder()
@@ -61,6 +67,7 @@ public class SentimentAnalysisActivity extends BaseActivity {
             AnalysisResults response = service
                     .analyze(parameters)
                     .execute();
+
             System.out.println(response);
 
             try {
@@ -80,7 +87,8 @@ public class SentimentAnalysisActivity extends BaseActivity {
         @Override
         protected void onPostExecute(Sentiment result) {
             hideProgressDialog();
-            Log.d(TAG, "onPostExecute: " + result);
+            Log.d(TAG, "onPostExecute: " + result.getAnger() + result.getAnger() + result.getAnger() + result.getAnger() + result.getAnger());
+
         }
     }
 
@@ -88,11 +96,39 @@ public class SentimentAnalysisActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sentiment_analysis);
-        handleBackBtn();
 
+        mAuth = FirebaseAuth.getInstance();
+        current_user_id = mAuth.getCurrentUser().getUid();
+
+        handleBackBtn();
+        getMemoriesFromDB();
+    }
+
+    private void getMemoriesFromDB() {
+        //final ArrayList<Memory> memories = new ArrayList<>();
+        //CollectionReference memoriesCollection = mFirestore.collection("memories");
+        Query query = mFirestore.collection("memories").whereEqualTo("userId", current_user_id);
+
+        query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()){
+                    for (DocumentSnapshot document: task.getResult()){
+                        //memories.add(document.toObject(Memory.class));
+                        startWatsonTask(document.toObject(Memory.class));
+                    }
+                    //Log.d("DATA =======> ",  memories.size()+"");
+
+                } else {
+                    Log.d("ERROR =======> ", "error getting documents: ", task.getException());
+                }
+            }
+        });
+    }
+
+    private void startWatsonTask(Memory memory) {
         AskWatsonTask task = new AskWatsonTask();
-        String[] textsToAnalyze = {"Fruits Apples and Oranges I love apples! I don't like oranges."};
-        task.execute(textsToAnalyze);
+        task.execute(memory.getMemoryTitle());
     }
 
     private void handleBackBtn() {

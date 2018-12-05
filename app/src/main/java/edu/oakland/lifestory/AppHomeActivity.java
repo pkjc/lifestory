@@ -21,6 +21,7 @@ import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -30,6 +31,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Locale;
 
 import edu.oakland.lifestory.model.Memory;
@@ -47,15 +49,15 @@ public class AppHomeActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private String current_user_id;
 
-    public long getSearchDate() {
+    public Date getSearchDate() {
         return searchDate;
     }
 
-    public void setSearchDate(long searchDate) {
+    public void setSearchDate(Date searchDate) {
         this.searchDate = searchDate;
     }
 
-    private long searchDate;
+    private Date searchDate;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -128,14 +130,22 @@ public class AppHomeActivity extends AppCompatActivity {
     }
 
     private void getMemoriesFromDB() {
-        final ArrayList<Memory> memories = new ArrayList<>();
+        //final ArrayList<Memory> memories = new ArrayList<>();
         //CollectionReference memoriesCollection = mFirestore.collection("memories");
         Query query = mFirestore.collection("memories").whereEqualTo("userId", current_user_id);
+        //if search date available, perform search on selected date
+        Date searchDate = getSearchDate();
+        if(searchDate != null){
+          Log.d("DATA", "Search date available"+searchDate);
+          query = mFirestore.collection("memories").whereEqualTo("userId", current_user_id)
+                    .whereGreaterThanOrEqualTo("memoryCreateDate", searchDate);
+        }
 
         query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()){
+                    memories.clear();
                     for (DocumentSnapshot document: task.getResult()){
                         memories.add(document.toObject(Memory.class));
                     }
@@ -186,21 +196,22 @@ public class AppHomeActivity extends AppCompatActivity {
             memories.add(newMemory);
         } else if (intent.hasExtra("SearchMemory")){
             //get the selected date from intent, call db query.
-            setSearchDate((long) intent.getLongExtra("SelectedDate", 0));
-            getMemoriesFromDB();
+            Bundle bundle = intent.getExtras();
+            setSearchDate(new Date(bundle.get("SelectedDate").toString()));
+            //getMemoriesFromDB();
         }
         getMemoriesFromDB();
         resetNavigation();
     }
 
     private void renderMemories(ArrayList<Memory> memories){
+        memoryLayout.removeAllViews();
         if (memories.isEmpty()) {
             noMemory = new TextView(getApplicationContext());
             noMemory.setText("No memories Yet! Click on Create Memory to add.");
             noMemory.setTextColor(getResources().getColor(android.R.color.black));
             memoryLayout.addView(noMemory);
         } else {
-            memoryLayout.removeAllViews();
             for (Memory memory : memories) {
                 LayoutInflater inflater = LayoutInflater.from(this);
                 LinearLayout linearLayout = null;

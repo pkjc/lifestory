@@ -18,6 +18,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -132,13 +133,16 @@ public class AppHomeActivity extends AppCompatActivity {
     private void getMemoriesFromDB() {
         //final ArrayList<Memory> memories = new ArrayList<>();
         //CollectionReference memoriesCollection = mFirestore.collection("memories");
-        Query query = mFirestore.collection("memories").whereEqualTo("userId", current_user_id);
+        Query query = mFirestore.collection("memories").whereEqualTo("userId", current_user_id)
+                .orderBy("memoryCreateDate", Query.Direction.DESCENDING);
+
         //if search date available, perform search on selected date
         Date searchDate = getSearchDate();
         if(searchDate != null){
           Log.d("DATA", "Search date available"+searchDate);
           query = mFirestore.collection("memories").whereEqualTo("userId", current_user_id)
-                    .whereGreaterThanOrEqualTo("memoryCreateDate", searchDate);
+                    .whereGreaterThanOrEqualTo("memoryCreateDate", searchDate)
+                  .orderBy("memoryCreateDate",Query.Direction.DESCENDING);
         }
 
         query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -246,6 +250,16 @@ public class AppHomeActivity extends AppCompatActivity {
                         if(memory.getBitMapUri() != null){
                             memoryImage.setImageURI(Uri.parse(memory.getBitMapUri()));
                         }
+                        //add listener for cardview
+                        cardView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Toast.makeText(v.getContext(), "Card view clicked!", Toast.LENGTH_SHORT).show();
+                                Intent memoryDetailsIntent = new Intent(AppHomeActivity.this, MemoryDetailsActivity.class);
+                                memoryDetailsIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                                v.getContext().startActivity(memoryDetailsIntent);
+                            }
+                        });
                         memoryLayout.addView(linearLayout);
                         break;
                     case "ImageMemory":

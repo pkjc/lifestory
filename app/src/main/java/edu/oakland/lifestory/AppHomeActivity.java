@@ -103,8 +103,8 @@ public class AppHomeActivity extends AppCompatActivity {
         quickCreateAudio = toolbar.findViewById(R.id.quickCreateAudio);
 
         mAuth = FirebaseAuth.getInstance();
-        //current_user_id = mAuth.getCurrentUser().getUid();
-        current_user_id = "AjKLJ0N8p5at5fsnSLLuHuPL2Zr1";
+        current_user_id = mAuth.getCurrentUser().getUid();
+        //current_user_id = "AjKLJ0N8p5at5fsnSLLuHuPL2Zr1";
 
         //For home screen disable back button
         backButton.setVisibility(View.INVISIBLE);
@@ -209,7 +209,7 @@ public class AppHomeActivity extends AppCompatActivity {
         resetNavigation();
     }
 
-    private void renderMemories(ArrayList<Memory> memories){
+    private void renderMemories(final ArrayList<Memory> memories){
         memoryLayout.removeAllViews();
         if (memories.isEmpty()) {
             noMemory = new TextView(getApplicationContext());
@@ -217,7 +217,8 @@ public class AppHomeActivity extends AppCompatActivity {
             noMemory.setTextColor(getResources().getColor(android.R.color.black));
             memoryLayout.addView(noMemory);
         } else {
-            for (Memory memory : memories) {
+            for (int position=0; position < memories.size(); position++) {
+                Memory memory = memories.get(position);
                 LayoutInflater inflater = LayoutInflater.from(this);
                 LinearLayout linearLayout = null;
                 CardView cardView = null;
@@ -228,6 +229,7 @@ public class AppHomeActivity extends AppCompatActivity {
                     case "Memory":
                         linearLayout = (LinearLayout) inflater.inflate(R.layout.activity_memory_card, null);
                         cardView = linearLayout.findViewById(R.id.cardView);
+                        cardView.setTag(position);
                         viewHolder = cardView.findViewById(R.id.viewHolder);
                         memoryTitle = viewHolder.findViewById(R.id.imgMemTitle);
                         //TextView memoryText = viewHolder.findViewById(R.id.memoryText);
@@ -256,9 +258,15 @@ public class AppHomeActivity extends AppCompatActivity {
                         cardView.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                Toast.makeText(v.getContext(), "Card view clicked!", Toast.LENGTH_SHORT).show();
+                               // Toast.makeText(v.getContext(), "Card view clicked!:", Toast.LENGTH_SHORT).show();
+                                //get the memory object using memory title
+                                int memPosition = (int) v.getTag();
+                                Memory memoryDetail = memories.get(memPosition);
+                                Log.d("MEMORY", ""+memoryDetail.getMemoryTitle()+":"+memoryDetail.getMemoryText());
+
                                 Intent memoryDetailsIntent = new Intent(AppHomeActivity.this, MemoryDetailsActivity.class);
                                 memoryDetailsIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                                memoryDetailsIntent.putExtra("MemoryView", memoryDetail);
                                 v.getContext().startActivity(memoryDetailsIntent);
                             }
                         });

@@ -204,6 +204,13 @@ public class AppHomeActivity extends AppCompatActivity {
             //get the selected date from intent, call db query.
             Bundle bundle = intent.getExtras();
             setSearchDate(new Date(bundle.get("SelectedDate").toString()));
+        } else if (intent.hasExtra("DialogAction")){
+            //No search results found, load all memories
+            setSearchDate(null);
+            if(this.getSupportFragmentManager().findFragmentByTag("Dialog Fragment") != null){
+                MessageDialogFragment dialogFragment = (MessageDialogFragment) this.getSupportFragmentManager().findFragmentByTag("Dialog Fragment");
+                dialogFragment.dismiss();
+            }
         }
         getMemoriesFromDB();
         resetNavigation();
@@ -212,10 +219,19 @@ public class AppHomeActivity extends AppCompatActivity {
     private void renderMemories(final ArrayList<Memory> memories){
         memoryLayout.removeAllViews();
         if (memories.isEmpty()) {
-            noMemory = new TextView(getApplicationContext());
-            noMemory.setText("No memories Yet! Click on Create Memory to add.");
-            noMemory.setTextColor(getResources().getColor(android.R.color.black));
-            memoryLayout.addView(noMemory);
+            //if search date available its search result
+            Date searchDate = getSearchDate();
+            if(searchDate != null){
+                //Show dialog that no results found
+                android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
+                MessageDialogFragment dialogFragment = new MessageDialogFragment();
+                dialogFragment.show(fm, "Dialog Fragment");
+            } else {
+                noMemory = new TextView(getApplicationContext());
+                noMemory.setText("No memories Yet! Click on Create Memory to add.");
+                noMemory.setTextColor(getResources().getColor(android.R.color.black));
+                memoryLayout.addView(noMemory);
+            }
         } else {
             for (int position=0; position < memories.size(); position++) {
                 Memory memory = memories.get(position);

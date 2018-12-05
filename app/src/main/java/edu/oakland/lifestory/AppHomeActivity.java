@@ -198,7 +198,6 @@ public class AppHomeActivity extends AppCompatActivity {
             //get the selected date from intent, call db query.
             Bundle bundle = intent.getExtras();
             setSearchDate(new Date(bundle.get("SelectedDate").toString()));
-            //getMemoriesFromDB();
         }
         getMemoriesFromDB();
         resetNavigation();

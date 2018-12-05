@@ -71,4 +71,16 @@ public class Memory implements Serializable {
         this.memoryTitle = memoryTitle;
         this.bitMapUri = bitmapUri;
     }*/
+
+    @Override
+    public String toString() {
+        return "Memory{" +
+                "memoryTitle='" + memoryTitle + '\'' +
+                ", memoryText='" + memoryText + '\'' +
+                ", memoryType='" + memoryType + '\'' +
+                ", bitMapUri='" + bitMapUri + '\'' +
+                ", memoryCreateDate=" + memoryCreateDate +
+                ", userId='" + userId + '\'' +
+                '}';
+    }
 }

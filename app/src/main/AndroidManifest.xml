@@ -60,6 +60,12 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name=".SearchMemoryActivity">
+            <intent-filter>
+                <action android:name="edu.oakland.lifestory.edu.oakland.lifestory.SearchMemory" />
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

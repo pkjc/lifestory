@@ -65,6 +65,8 @@ public class AppHomeActivity extends BaseActivity {
                 case R.id.navigation_home:
                      return true;
                 case R.id.navigation_settings:
+                    Intent settingsIntent = new Intent("edu.oakland.lifestory.SettingsActivity");
+                    startActivity(settingsIntent);
                      return true;
                 case R.id.navigation_add:
                      Intent intent = new Intent("edu.oakland.lifestory.AddMemory");

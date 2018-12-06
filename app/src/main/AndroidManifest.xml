@@ -14,7 +14,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -30,8 +30,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".AppIntroActivity">
-        </activity>
+        <activity android:name=".AppIntroActivity"></activity>
         <activity
             android:name=".AppHomeActivity"
             android:label="@string/title_activity_app_home">
@@ -41,7 +40,13 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".NavDrawerActivity" />
+        <activity android:name=".NavDrawerActivity">
+            <intent-filter>
+                <action android:name="edu.oakland.lifestory.NavDrawerActivity" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <activity android:name=".MemoryActivity">
             <intent-filter>
                 <action android:name="edu.oakland.lifestory.AddMemory" />
@@ -59,16 +64,19 @@
         <activity android:name=".SentimentAnalysisActivity">
             <intent-filter>
                 <action android:name="edu.oakland.lifestory.SentimentAnalysisActivity" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <activity android:name=".SearchMemoryActivity">
             <intent-filter>
                 <action android:name="edu.oakland.lifestory.SearchMemory" />
-                <category android:name="android.intent.category.DEFAULT"/>
+
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".MemoryDetailsActivity"></activity>
+        <activity android:name=".MemoryDetailsActivity" />
+
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.example.android.fileprovider"
@@ -76,8 +84,17 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"></meta-data>
+                android:resource="@xml/file_paths" />
         </provider>
+
+        <activity android:name=".SettingsActivity">
+            <intent-filter>
+                <action android:name="edu.oakland.lifestory.SettingsActivity" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+        </activity>
     </application>
 
 </manifest>

@@ -639,7 +639,7 @@ public class MemoryActivity extends AppCompatActivity {
         //super.onActivityResult(requestCode, resultCode, data);
         if(resultCode != RESULT_CANCELED) {
             if (requestCode == Constants.REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-                Log.d("URI>> ", "onActivityResult: " + data.toString() + " DATA>>  " +  getImageUri((Bitmap) data.getExtras().get("data")));
+                //Log.d("URI>> ", "onActivityResult: " + data.toString() + " DATA>>  " +  getImageUri((Bitmap) data.getExtras().get("data")));
                 imageView.setImageBitmap((Bitmap) data.getExtras().get("data"));
                 final String randomName = UUID.randomUUID().toString();
                 StorageReference filepath = storageReference.child("Photos").child(randomName + ".jpg");
@@ -652,7 +652,7 @@ public class MemoryActivity extends AppCompatActivity {
                             task.getResult().getStorage().getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                 @Override
                                 public void onSuccess(Uri uri) {
-                                    Log.d("", "onSuccess: uri= "+ uri.toString());
+                                    //Log.d("", "onSuccess: uri= "+ uri.toString());
                                     downloadUri = uri.toString();
                                 }
                             });

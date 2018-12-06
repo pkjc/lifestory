@@ -28,19 +28,22 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.UUID;
 
 import edu.oakland.lifestory.model.Memory;
 import edu.oakland.lifestory.utils.Constants;
+import id.zelory.compressor.Compressor;
 
 import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
-
 public class MemoryActivity extends AppCompatActivity {
     //boolean flag to know if main FAB is in open or closed state.
     private boolean fabExpanded = false;
@@ -53,11 +56,15 @@ public class MemoryActivity extends AppCompatActivity {
     EditText memoryTitle, memoryContent;
     ImageButton backButton, createMemButton;
     ImageView imageView;
-
+    String downloadUri;
     int i;
     private FirebaseFirestore mFirestore = FirebaseFirestore.getInstance();
+    private StorageReference storageReference;
     private FirebaseAuth mAuth;
     private String current_user_id;
+
+    private Bitmap compressedImageFile;
+    private Uri imgUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,13 +134,12 @@ public class MemoryActivity extends AppCompatActivity {
 
                 if(imageView.getDrawable() != null && ((BitmapDrawable)imageView.getDrawable()).getBitmap() != null) {
                     Bitmap bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
-                    memory.setBitMapUri(getImageUri(bitmap));
+                    getImageUri(bitmap);
+                    memory.setBitMapUri(downloadUri);
                 }
                 memory.setMemoryCreateDate(new Date());
                 memory.setMemoryType("Memory");
                 memory.setUserId(current_user_id);
-
-                handleMemoryImgUpload();
 
                 DocumentReference mDocRef = mFirestore.document("memories/memory"+ i);
                 mFirestore.collection("memories").add(memory).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
@@ -156,13 +162,6 @@ public class MemoryActivity extends AppCompatActivity {
                 v.getContext().startActivity(homeIntent);
             }
 
-            private void handleMemoryImgUpload() {
-
-                final String randomName = UUID.randomUUID().toString();
-
-                //File newImageFile = new File(memory.get.getPath());
-
-            }
         });
     }
 
@@ -256,7 +255,9 @@ public class MemoryActivity extends AppCompatActivity {
         }
         if(requestCode == Constants.REQUEST_PICK_IMAGE){
             if(data != null){
+                final String randomName = UUID.randomUUID().toString();
                 Uri contentUri = data.getData();
+                imgUri = contentUri;
                 try{
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), contentUri);
                     //Toast.makeText(MemoryActivity.this, "Image Saved!", Toast.LENGTH_SHORT).show();
@@ -273,15 +274,59 @@ public class MemoryActivity extends AppCompatActivity {
         }
     }
 
-    private String getImageUri(Bitmap inImage) {
+    private void handleMemoryImgUpload(Uri contentUri) {
+
+        if(contentUri != null) {
+            final String randomName = UUID.randomUUID().toString();
+
+            File newImageFile = new File(contentUri.getPath());
+
+            try {
+                compressedImageFile = new Compressor(MemoryActivity.this)
+                        .setMaxHeight(720)
+                        .setMaxWidth(720)
+                        .setQuality(50)
+                        .compressToBitmap(newImageFile);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            compressedImageFile.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            byte[] imageData = baos.toByteArray();
+
+            UploadTask filePath = storageReference.child("memory_images").child(randomName + ".jpg").putBytes(imageData);
+            filePath.addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                private static final String TAG = "MemoryActivity";
+                @Override
+                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                    downloadUri = task.getResult().getStorage().getDownloadUrl().toString();
+                    Log.d(TAG, "onComplete: " + downloadUri);
+                }
+            });
+
+        }
+    }
+
+    private Uri getImageUri(Bitmap inImage) {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
         String path = "";
+
+        if(ContextCompat.checkSelfPermission(this,READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            //path = MediaStore.Images.Media.insertImage(this.getContentResolver(), inImage, null, null);
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{READ_EXTERNAL_STORAGE},Constants.PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE);
+        }
+
         if(ContextCompat.checkSelfPermission(this,WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             path = MediaStore.Images.Media.insertImage(this.getContentResolver(), inImage, null, null);
         } else {
             ActivityCompat.requestPermissions(this, new String[]{WRITE_EXTERNAL_STORAGE},Constants.PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE);
         }
-        return Uri.parse(path).toString();
+
+        return Uri.parse(path);
     }
+
 }

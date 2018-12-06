@@ -372,11 +372,7 @@ public class MemoryActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                         if(task.isSuccessful()){
-                            Log.d("download uri >>>> ", "onSuccess: " + task.getResult().getStorage().getDownloadUrl().toString());
-                            //downloadUri = task.getResult().getStorage().getDownloadUrl().toString();
-                            addImgRefToFirebase(task.getResult().getStorage().getDownloadUrl());
                             Toast.makeText(MemoryActivity.this, "Upload Successful!", Toast.LENGTH_SHORT).show();
-
                             task.getResult().getStorage().getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                 @Override
                                 public void onSuccess(Uri uri) {

@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -268,7 +267,7 @@ public class AppHomeActivity extends BaseActivity {
                         }
                         if(memory.getBitMapUri() != null){
                             //memoryImage.setImageURI(Uri.parse(memory.getBitMapUri()));
-                            Glide.with(AppHomeActivity.this).load(memory.getBitMapUri()).into(memoryImage);
+                            Glide.with(this).load(memory.getBitMapUri()).into(memoryImage);
                         }
                         //add listener for cardview
                         cardView.setOnClickListener(new View.OnClickListener() {

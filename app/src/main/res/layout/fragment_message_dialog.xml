@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="wrap_content" android:orientation="vertical" android:layout_gravity="center"
+    android:padding="10dp">
+
+    <TextView android:padding="20dp"
+        android:id="@+id/dialogText"
+        android:layout_width="wrap_content" android:layout_gravity="center"
+        android:layout_height="wrap_content"
+        android:text="No memories found..." android:textSize="20dp"
+        android:textAppearance="@android:style/TextAppearance.Widget.TextView" />
+    <Button android:layout_gravity="center"
+        android:layout_width="wrap_content" android:id="@+id/dialogAction"
+        android:layout_height="wrap_content" android:text="OK"/>
+</LinearLayout>

@@ -1,5 +1,6 @@
 package edu.oakland.lifestory;
 
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -7,6 +8,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
@@ -18,9 +20,11 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -30,6 +34,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Locale;
 
 import edu.oakland.lifestory.model.Memory;
@@ -47,15 +52,15 @@ public class AppHomeActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private String current_user_id;
 
-    public long getSearchDate() {
+    public Date getSearchDate() {
         return searchDate;
     }
 
-    public void setSearchDate(long searchDate) {
+    public void setSearchDate(Date searchDate) {
         this.searchDate = searchDate;
     }
 
-    private long searchDate;
+    private Date searchDate;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -98,8 +103,8 @@ public class AppHomeActivity extends AppCompatActivity {
         quickCreateAudio = toolbar.findViewById(R.id.quickCreateAudio);
 
         mAuth = FirebaseAuth.getInstance();
-        //current_user_id = mAuth.getCurrentUser().getUid();
-        current_user_id = "AjKLJ0N8p5at5fsnSLLuHuPL2Zr1";
+        current_user_id = mAuth.getCurrentUser().getUid();
+        //current_user_id = "AjKLJ0N8p5at5fsnSLLuHuPL2Zr1";
 
         //For home screen disable back button
         backButton.setVisibility(View.INVISIBLE);
@@ -128,14 +133,25 @@ public class AppHomeActivity extends AppCompatActivity {
     }
 
     private void getMemoriesFromDB() {
-        final ArrayList<Memory> memories = new ArrayList<>();
+        //final ArrayList<Memory> memories = new ArrayList<>();
         //CollectionReference memoriesCollection = mFirestore.collection("memories");
-        Query query = mFirestore.collection("memories").whereEqualTo("userId", current_user_id);
+        Query query = mFirestore.collection("memories").whereEqualTo("userId", current_user_id)
+                .orderBy("memoryCreateDate", Query.Direction.DESCENDING);
+
+        //if search date available, perform search on selected date
+        Date searchDate = getSearchDate();
+        if(searchDate != null){
+          Log.d("DATA", "Search date available"+searchDate);
+          query = mFirestore.collection("memories").whereEqualTo("userId", current_user_id)
+                    .whereGreaterThanOrEqualTo("memoryCreateDate", searchDate)
+                  .orderBy("memoryCreateDate",Query.Direction.DESCENDING);
+        }
 
         query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()){
+                    memories.clear();
                     for (DocumentSnapshot document: task.getResult()){
                         memories.add(document.toObject(Memory.class));
                     }
@@ -186,22 +202,39 @@ public class AppHomeActivity extends AppCompatActivity {
             memories.add(newMemory);
         } else if (intent.hasExtra("SearchMemory")){
             //get the selected date from intent, call db query.
-            setSearchDate((long) intent.getLongExtra("SelectedDate", 0));
-            getMemoriesFromDB();
+            Bundle bundle = intent.getExtras();
+            setSearchDate(new Date(bundle.get("SelectedDate").toString()));
+        } else if (intent.hasExtra("DialogAction")){
+            //No search results found, load all memories
+            setSearchDate(null);
+            if(this.getSupportFragmentManager().findFragmentByTag("Dialog Fragment") != null){
+                MessageDialogFragment dialogFragment = (MessageDialogFragment) this.getSupportFragmentManager().findFragmentByTag("Dialog Fragment");
+                dialogFragment.dismiss();
+            }
         }
         getMemoriesFromDB();
         resetNavigation();
     }
 
-    private void renderMemories(ArrayList<Memory> memories){
+    private void renderMemories(final ArrayList<Memory> memories){
+        memoryLayout.removeAllViews();
         if (memories.isEmpty()) {
-            noMemory = new TextView(getApplicationContext());
-            noMemory.setText("No memories Yet! Click on Create Memory to add.");
-            noMemory.setTextColor(getResources().getColor(android.R.color.black));
-            memoryLayout.addView(noMemory);
+            //if search date available its search result
+            Date searchDate = getSearchDate();
+            if(searchDate != null){
+                //Show dialog that no results found
+                android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
+                MessageDialogFragment dialogFragment = new MessageDialogFragment();
+                dialogFragment.show(fm, "Dialog Fragment");
+            } else {
+                noMemory = new TextView(getApplicationContext());
+                noMemory.setText("No memories Yet! Click on Create Memory to add.");
+                noMemory.setTextColor(getResources().getColor(android.R.color.black));
+                memoryLayout.addView(noMemory);
+            }
         } else {
-            memoryLayout.removeAllViews();
-            for (Memory memory : memories) {
+            for (int position=0; position < memories.size(); position++) {
+                Memory memory = memories.get(position);
                 LayoutInflater inflater = LayoutInflater.from(this);
                 LinearLayout linearLayout = null;
                 CardView cardView = null;
@@ -212,6 +245,7 @@ public class AppHomeActivity extends AppCompatActivity {
                     case "Memory":
                         linearLayout = (LinearLayout) inflater.inflate(R.layout.activity_memory_card, null);
                         cardView = linearLayout.findViewById(R.id.cardView);
+                        cardView.setTag(position);
                         viewHolder = cardView.findViewById(R.id.viewHolder);
                         memoryTitle = viewHolder.findViewById(R.id.imgMemTitle);
                         //TextView memoryText = viewHolder.findViewById(R.id.memoryText);
@@ -236,6 +270,22 @@ public class AppHomeActivity extends AppCompatActivity {
                         if(memory.getBitMapUri() != null){
                             memoryImage.setImageURI(Uri.parse(memory.getBitMapUri()));
                         }
+                        //add listener for cardview
+                        cardView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                               // Toast.makeText(v.getContext(), "Card view clicked!:", Toast.LENGTH_SHORT).show();
+                                //get the memory object using memory title
+                                int memPosition = (int) v.getTag();
+                                Memory memoryDetail = memories.get(memPosition);
+                                Log.d("MEMORY", ""+memoryDetail.getMemoryTitle()+":"+memoryDetail.getMemoryText());
+
+                                Intent memoryDetailsIntent = new Intent(AppHomeActivity.this, MemoryDetailsActivity.class);
+                                memoryDetailsIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                                memoryDetailsIntent.putExtra("MemoryView", memoryDetail);
+                                v.getContext().startActivity(memoryDetailsIntent);
+                            }
+                        });
                         memoryLayout.addView(linearLayout);
                         break;
                     case "ImageMemory":

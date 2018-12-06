@@ -29,7 +29,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".AppIntroActivity"></activity>
+        <activity android:name=".AppIntroActivity">
+        </activity>
         <activity
             android:name=".AppHomeActivity"
             android:label="@string/title_activity_app_home">
@@ -60,6 +61,13 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name=".SearchMemoryActivity">
+            <intent-filter>
+                <action android:name="edu.oakland.lifestory.SearchMemory" />
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".MemoryDetailsActivity"></activity>
     </application>
 
 </manifest>

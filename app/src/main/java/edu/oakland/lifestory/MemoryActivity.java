@@ -528,7 +528,6 @@ public class MemoryActivity extends AppCompatActivity {
     public void checkPermissionsAndOpenFilePicker() {
         String permission = Manifest.permission.READ_EXTERNAL_STORAGE;
 
-
         if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
                 showError();
@@ -553,6 +552,7 @@ public class MemoryActivity extends AppCompatActivity {
             case Constants.PERMISSION_REQUEST_CAMERA: {
                 if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show();
+                    capturePhoto();
                 }else{
                     Toast.makeText(this, "Permission Denied", Toast.LENGTH_LONG).show();
                 }
@@ -611,7 +611,7 @@ public class MemoryActivity extends AppCompatActivity {
         return image;
     }
 
-    public void takePicAndDisplayIt() {
+    void capturePhoto(){
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (intent.resolveActivity(getPackageManager()) != null) {
             File file = null;
@@ -622,6 +622,15 @@ public class MemoryActivity extends AppCompatActivity {
             }
 
             startActivityForResult(intent, Constants.REQUEST_IMAGE_CAPTURE);
+        }
+    }
+
+    public void takePicAndDisplayIt() {
+        String CAMERA_PERMISSION = Manifest.permission.CAMERA;
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            capturePhoto();
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{CAMERA_PERMISSION},Constants.PERMISSION_REQUEST_CAMERA);
         }
     }
 

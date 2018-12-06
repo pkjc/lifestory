@@ -108,6 +108,7 @@ public class SentimentAnalysisActivity extends BaseActivity {
 
         mAuth = FirebaseAuth.getInstance();
         current_user_id = mAuth.getCurrentUser().getUid();
+        //current_user_id = "AjKLJ0N8p5at5fsnSLLuHuPL2Zr1";
 
         handleBackBtn();
 

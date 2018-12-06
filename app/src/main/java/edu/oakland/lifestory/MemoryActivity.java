@@ -45,7 +45,6 @@ import java.util.UUID;
 import edu.oakland.lifestory.model.Memory;
 import edu.oakland.lifestory.utils.Constants;
 import id.zelory.compressor.Compressor;
-
 import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
@@ -89,8 +88,8 @@ public class MemoryActivity extends AppCompatActivity {
         fabAudio = (FloatingActionButton) this.findViewById(R.id.fabAudio);
 
         mAuth = FirebaseAuth.getInstance();
-        //current_user_id = mAuth.getCurrentUser().getUid();
-        current_user_id = "AjKLJ0N8p5at5fsnSLLuHuPL2Zr1";
+        current_user_id = mAuth.getCurrentUser().getUid();
+        //current_user_id = "AjKLJ0N8p5at5fsnSLLuHuPL2Zr1";
 
         //When main Fab (Attach) is clicked, it expands if not expanded already.
         //Collapses if main FAB was open already.

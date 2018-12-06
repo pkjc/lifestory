@@ -35,7 +35,7 @@
                 android:layout_height="40dp" android:fitsSystemWindows="true"
                 android:layout_gravity="bottom" android:layout_marginStart="16dp" android:layout_marginBottom="16dp"
                 android:layout_marginEnd="16dp" app:layout_collapseMode="pin"
-                android:textSize="30dp" android:textColor="@color/White"
+                android:textSize="30sp" android:textColor="@color/White"
                 android:textAppearance="@android:style/TextAppearance.Material.Widget.TextView" />
 
         </android.support.design.widget.CollapsingToolbarLayout>
@@ -57,8 +57,8 @@
                     android:id="@+id/memoryContent"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/text_margin" android:text="@string/large_text"
-                    android:textAppearance="@android:style/TextAppearance.Widget.TextView" />
+                    android:layout_margin="@dimen/text_margin" android:textSize="20sp"
+                    android:textAppearance="@android:style/TextAppearance.Material.Widget.TextView" />
 
                 <ImageView
                     android:id="@+id/memoryImage"

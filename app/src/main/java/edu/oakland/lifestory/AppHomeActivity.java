@@ -39,7 +39,7 @@ import java.util.Locale;
 
 import edu.oakland.lifestory.model.Memory;
 
-public class AppHomeActivity extends AppCompatActivity {
+public class AppHomeActivity extends BaseActivity {
 
     private TextView mTextMessage;
     private TextView noMemory;
@@ -135,6 +135,8 @@ public class AppHomeActivity extends AppCompatActivity {
     private void getMemoriesFromDB() {
         //final ArrayList<Memory> memories = new ArrayList<>();
         //CollectionReference memoriesCollection = mFirestore.collection("memories");
+        //Show progress dialog until memories load
+        showProgressDialog();
         Query query = mFirestore.collection("memories").whereEqualTo("userId", current_user_id)
                 .orderBy("memoryCreateDate", Query.Direction.DESCENDING);
 
@@ -217,6 +219,8 @@ public class AppHomeActivity extends AppCompatActivity {
     }
 
     private void renderMemories(final ArrayList<Memory> memories){
+        //Hide progress dialog
+        hideProgressDialog();
         memoryLayout.removeAllViews();
         if (memories.isEmpty()) {
             //if search date available its search result

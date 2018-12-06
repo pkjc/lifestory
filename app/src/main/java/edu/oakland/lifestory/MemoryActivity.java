@@ -7,11 +7,13 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -24,16 +26,19 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
@@ -59,13 +64,15 @@ public class MemoryActivity extends AppCompatActivity {
     String downloadUri;
     int i;
     private FirebaseFirestore mFirestore = FirebaseFirestore.getInstance();
-    private StorageReference storageReference;
+    private StorageReference storageReference = FirebaseStorage.getInstance().getReference();
     private FirebaseAuth mAuth;
     private String current_user_id;
 
     private Bitmap compressedImageFile;
     private Uri imgUri;
-
+    private static final int GALLERY_INTENT = 2;
+    private static final int CAMERA_REQUEST_CODE = 1;
+    String mCurrentPhotoPath;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,6 +107,8 @@ public class MemoryActivity extends AppCompatActivity {
         });
         //Only main FAB is visible in the beginning
         closeSubMenusFab();
+
+        askPermissions();
 
         fabImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -141,6 +150,7 @@ public class MemoryActivity extends AppCompatActivity {
                 memory.setMemoryCreateDate(new Date());
                 memory.setMemoryType("Memory");
                 memory.setUserId(current_user_id);
+                memory.setBitMapUri(downloadUri);
 
                 DocumentReference mDocRef = mFirestore.document("memories/memory"+ i);
                 mFirestore.collection("memories").add(memory).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
@@ -164,6 +174,22 @@ public class MemoryActivity extends AppCompatActivity {
             }
 
         });
+    }
+
+    void askPermissions(){
+        if(ContextCompat.checkSelfPermission(this,READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            //TODO
+            Toast.makeText(this, "Read perm granted.", Toast.LENGTH_SHORT).show();
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{READ_EXTERNAL_STORAGE},Constants.PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE);
+        }
+
+        if(ContextCompat.checkSelfPermission(this,WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            // TODO
+            Toast.makeText(this, "Write perm granted.", Toast.LENGTH_SHORT).show();
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{WRITE_EXTERNAL_STORAGE},Constants.PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE);
+        }
     }
 
     //closes FAB submenus
@@ -199,7 +225,9 @@ public class MemoryActivity extends AppCompatActivity {
                            chooseImageFromGallery();
                            break;
                     case 1: //from camera
-                           captureImageFromCamera();
+                           //captureImageFromCamera();
+                            //dispatchTakePictureIntent();
+                            takePicAndDisplayIt();
                            break;
                     case 2: //cancel
                            break;
@@ -247,36 +275,149 @@ public class MemoryActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data){
-        super.onActivityResult(requestCode, resultCode, data);
+//    @Override
+//    public void onActivityResult(int requestCode, int resultCode, Intent data){
+//        super.onActivityResult(requestCode, resultCode, data);
+//
+//        if(resultCode == this.RESULT_CANCELED){
+//            return;
+//        }
+//        if(requestCode == Constants.REQUEST_PICK_IMAGE){
+//            if(data != null){
+//                final String randomName = UUID.randomUUID().toString();
+//                Uri contentUri = data.getData();
+//                imgUri = contentUri;
+//                try{
+//                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), contentUri);
+//                    //Toast.makeText(MemoryActivity.this, "Image Saved!", Toast.LENGTH_SHORT).show();
+//                    imageView.setImageBitmap(bitmap.createScaledBitmap(bitmap, bitmap.getWidth(), bitmap.getHeight(), true));
+//                    handleMemoryImgUpload(imgUri);
+//                } catch(IOException ie){
+//                    ie.printStackTrace();
+//                    Toast.makeText(MemoryActivity.this, "Failed!", Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//        } else if(requestCode == Constants.REQUEST_IMAGE_CAPTURE){
+//                Bitmap thumbnail = (Bitmap)data.getExtras().get("data");
+//                imageView.setImageBitmap(thumbnail);
+//                Toast.makeText(MemoryActivity.this, "Image Saved!", Toast.LENGTH_SHORT).show();
+//                handleMemoryImgUpload(imgUri);
+//        }
+//    }
 
-        if(resultCode == this.RESULT_CANCELED){
-            return;
-        }
-        if(requestCode == Constants.REQUEST_PICK_IMAGE){
-            if(data != null){
-                final String randomName = UUID.randomUUID().toString();
-                Uri contentUri = data.getData();
-                imgUri = contentUri;
-                try{
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), contentUri);
-                    //Toast.makeText(MemoryActivity.this, "Image Saved!", Toast.LENGTH_SHORT).show();
-                    imageView.setImageBitmap(bitmap.createScaledBitmap(bitmap, bitmap.getWidth(), bitmap.getHeight(), true));
-                } catch(IOException ie){
-                    ie.printStackTrace();
-                    Toast.makeText(MemoryActivity.this, "Failed!", Toast.LENGTH_SHORT).show();
-                }
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = image.getAbsolutePath();
+        Toast.makeText(this, "FILE CREATED", Toast.LENGTH_SHORT).show();
+        return image;
+    }
+
+    public void takePicAndDisplayIt() {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            File file = null;
+            try {
+                file = createImageFile();
+            } catch (IOException ex) {
+                // Error occurred while creating the File
             }
-        } else if(requestCode == Constants.REQUEST_IMAGE_CAPTURE){
-                Bitmap thumbnail = (Bitmap)data.getExtras().get("data");
-                imageView.setImageBitmap(thumbnail);
-                Toast.makeText(MemoryActivity.this, "Image Saved!", Toast.LENGTH_SHORT).show();
+
+            startActivityForResult(intent, Constants.REQUEST_IMAGE_CAPTURE);
+        }
+    }
+
+    private void dispatchTakePictureIntent() {
+        Toast.makeText(this, "in dispatchTakePictureIntent", Toast.LENGTH_SHORT).show();
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                // Error occurred while creating the File...
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(this,
+                        "com.example.android.fileprovider",
+                        photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, CAMERA_REQUEST_CODE);
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode != RESULT_CANCELED) {
+            if (requestCode == Constants.REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+                Log.d("URI>> ", "onActivityResult: " + data.toString() + " DATA>>  " +  getImageUri((Bitmap) data.getExtras().get("data")));
+                imageView.setImageBitmap((Bitmap) data.getExtras().get("data"));
+                final String randomName = UUID.randomUUID().toString();
+                StorageReference filepath = storageReference.child("Photos").child(randomName + ".jpg");
+
+                filepath.putFile(getImageUri((Bitmap) data.getExtras().get("data"))).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                        if(task.isSuccessful()){
+                            Log.d("download uri >>>> ", "onSuccess: " + task.getResult().getStorage().getDownloadUrl().toString());
+                            //downloadUri = task.getResult().getStorage().getDownloadUrl().toString();
+                            addImgRefToFirebase(task.getResult().getStorage().getDownloadUrl());
+                            Toast.makeText(MemoryActivity.this, "Upload Successful!", Toast.LENGTH_SHORT).show();
+
+                            task.getResult().getStorage().getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+                                    Log.d("", "onSuccess: uri= "+ uri.toString());
+                                    downloadUri = uri.toString();
+                                }
+                            });
+
+                        }else {
+                            Log.d(">> TASK FAILED", "onComplete: ");
+                        }
+                    }
+
+                    private void addImgRefToFirebase(Task<Uri> downloadUrl) {
+                    }
+                });
+
+//                filepath.putFile(getImageUri((Bitmap) data.getExtras().get("data"))).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+//                    @Override
+//                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+//                        Log.d("download uri >>>> ", "onSuccess: " + taskSnapshot.getStorage().getDownloadUrl());
+//                        Log.d("download uri >>>> ", "onSuccess: " + taskSnapshot.getStorage().getDownloadUrl().getResult().getPath());
+//                        addImgRefToFirebase(taskSnapshot.getStorage().getDownloadUrl());
+//                        Toast.makeText(MemoryActivity.this, "Upload Successful!", Toast.LENGTH_SHORT).show();
+//                    }
+//
+//                    private void addImgRefToFirebase(Task<Uri> downloadUrl) {
+//                    }
+//                }).addOnFailureListener(new OnFailureListener() {
+//                    @Override
+//                    public void onFailure(@NonNull Exception e) {
+//                        Toast.makeText(MemoryActivity.this, "Upload Failed!", Toast.LENGTH_SHORT).show();
+//                    }
+//                });
+            }
         }
     }
 
     private void handleMemoryImgUpload(Uri contentUri) {
-
+        Toast.makeText(this, "Inside memory upload", Toast.LENGTH_SHORT).show();
         if(contentUri != null) {
             final String randomName = UUID.randomUUID().toString();
 
@@ -299,11 +440,17 @@ public class MemoryActivity extends AppCompatActivity {
 
             UploadTask filePath = storageReference.child("memory_images").child(randomName + ".jpg").putBytes(imageData);
             filePath.addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                private static final String TAG = "MemoryActivity";
+                private static final String TAG = ">>>>UploadIm";
                 @Override
                 public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                    downloadUri = task.getResult().getStorage().getDownloadUrl().toString();
-                    Log.d(TAG, "onComplete: " + downloadUri);
+                    if(task.isSuccessful()){
+                        downloadUri = task.getResult().getStorage().getDownloadUrl().toString();
+                        Log.d(TAG, ">>>>>>>>>>>>> Upload Image onComplete: " + downloadUri);
+                        Toast.makeText(MemoryActivity.this, "Uploded successfully", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(MemoryActivity.this, "Uploded failed", Toast.LENGTH_SHORT).show();
+                    }
+
                 }
             });
 

@@ -32,6 +32,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -117,7 +118,16 @@ public class MemoryActivity extends AppCompatActivity {
         fabImage = (FloatingActionButton) this.findViewById(R.id.fabImage);
         fabAudio = (FloatingActionButton) this.findViewById(R.id.fabAudio);
 
+        playBtn = findViewById(R.id.playBtn);
+        playBtn.setVisibility(View.GONE);
+        playBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startPlaying(null);
+            }
+        });
         recordBtn = findViewById(R.id.recordBtn);
+        recordBtn.setVisibility(View.GONE);
         recordBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -125,6 +135,7 @@ public class MemoryActivity extends AppCompatActivity {
             }
         });
         cmTimer = (Chronometer) findViewById(R.id.cmTimer);
+        cmTimer.setVisibility(View.GONE);
         cmTimer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
             public void onChronometerTick(Chronometer arg0) {
                 if (!resume) {
@@ -246,6 +257,7 @@ public class MemoryActivity extends AppCompatActivity {
     private void startRecording() {
         recordBtn.setVisibility(View.VISIBLE);
         cmTimer.setVisibility(View.VISIBLE);
+        playBtn.setVisibility(View.VISIBLE);
         requestAudioPermissions();
     }
 
@@ -422,10 +434,38 @@ public class MemoryActivity extends AppCompatActivity {
             mRecorder = null;
             cmTimer.stop();
             cmTimer.setText("00:00");
-            Toast.makeText(getApplicationContext(), "Recording stopped", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Recording stopped" + mAudioFile.getPath(), Toast.LENGTH_LONG).show();
+
+            uploadAudio();
         }
     }
+    private void uploadAudio(){
+        Uri file = Uri.fromFile(new File(mAudioFile.getPath()));
+        final StorageReference fileRef = storageReference.child("Audio/"+file.getLastPathSegment());
+        UploadTask uploadTask = fileRef.putFile(file);
 
+        Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+            @Override
+            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                if (!task.isSuccessful()) {
+                    throw task.getException();
+                }
+                // Continue with the task to get the download URL
+                return fileRef.getDownloadUrl();
+            }
+        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+            @Override
+            public void onComplete(@NonNull Task<Uri> task) {
+                if (task.isSuccessful()) {
+                    Uri downloadUri = task.getResult();
+                    Toast.makeText(MemoryActivity.this, "Upload Successful!"+ downloadUri, Toast.LENGTH_SHORT).show();
+                } else {
+                    // Handle failures
+                    // ...
+                }
+            }
+        });
+    }
     public void startPlaying(View view) {
         Log.e("startPlaying", ""+isPlaying);
         if(!isPlaying){

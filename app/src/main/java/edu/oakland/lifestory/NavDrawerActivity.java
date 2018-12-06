@@ -71,7 +71,7 @@ public class NavDrawerActivity extends BaseActivity implements
         mFullNameTextView.setText(mUsername);
         mEmailTextView.setText(mEmail);
 
-        Picasso.with(mContext)
+        Picasso.get()
                 .load(mPhotoUri)
                 .placeholder(android.R.drawable.sym_def_app_icon)
                 .error(android.R.drawable.sym_def_app_icon)

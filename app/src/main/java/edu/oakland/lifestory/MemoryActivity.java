@@ -397,7 +397,7 @@ public class MemoryActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 switch (which){
                     case 0: //from gallery
-                        chooseImageFromDevice();
+                        chooseAudioFromDevice();
                         break;
                     case 1: //from camera
                         startRecording();
@@ -410,7 +410,8 @@ public class MemoryActivity extends AppCompatActivity {
         imageDialog.show();
     }
 
-    private void chooseImageFromDevice() {
+    private void chooseAudioFromDevice() {
+        checkPermissionsAndOpenFilePicker();
     }
 
     public void stopRecording() {
@@ -456,6 +457,21 @@ public class MemoryActivity extends AppCompatActivity {
             MemoryActivity.this.startActivityForResult(galleryIntent, Constants.REQUEST_PICK_IMAGE);
         } else {
             ActivityCompat.requestPermissions(this, new String[]{READ_EXTERNAL_STORAGE},Constants.PERMISSION_REQUEST_READ_EXTERNAL_STORAGE);
+        }
+    }
+
+    public void checkPermissionsAndOpenFilePicker() {
+        String permission = Manifest.permission.READ_EXTERNAL_STORAGE;
+
+
+        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
+                showError();
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{permission}, PERMISSIONS_REQUEST_CODE);
+            }
+        } else {
+            openFilePicker();
         }
     }
 

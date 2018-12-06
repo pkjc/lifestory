@@ -17,7 +17,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -25,6 +24,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.squareup.picasso.Picasso;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -132,7 +132,7 @@ public class AppHomeActivity extends BaseActivity {
         //Show progress dialog until memories load
         showProgressDialog();
         Query query = mFirestore.collection("memories").whereEqualTo("userId", current_user_id)
-                .orderBy("memoryCreateDate", Query.Direction.DESCENDING).limit(5);
+                .orderBy("memoryCreateDate", Query.Direction.DESCENDING).limit(10);
 
         //if search date available, perform search on selected date
         Date searchDate = getSearchDate();
@@ -267,7 +267,8 @@ public class AppHomeActivity extends BaseActivity {
                         }
                         if(memory.getBitMapUri() != null){
                             //memoryImage.setImageURI(Uri.parse(memory.getBitMapUri()));
-                            Glide.with(this).load(memory.getBitMapUri()).into(memoryImage);
+                            //Glide.with(this).load(memory.getBitMapUri()).into(memoryImage);
+                            Picasso.get().load(memory.getBitMapUri()).into(memoryImage);
                         }
                         //add listener for cardview
                         cardView.setOnClickListener(new View.OnClickListener() {
@@ -308,7 +309,8 @@ public class AppHomeActivity extends BaseActivity {
 //                            }
 
                             Log.d(" RENDER >> ", "renderMemories: " + memory.getBitMapUri());
-                            Glide.with(AppHomeActivity.this).load(memory.getBitMapUri()).into(memoryImage);
+                            //Glide.with(AppHomeActivity.this).load(memory.getBitMapUri()).into(memoryImage);
+                            Picasso.get().load(memory.getBitMapUri()).into(memoryImage);
                         }
 
 

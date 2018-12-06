@@ -7,35 +7,21 @@
     <script type="text/javascript">
     google.charts.load('current', {'packages':['corechart']});
     google.charts.setOnLoadCallback(drawChart);
-    var data_array = [
-        ['Gain', 'Time'],
-    ];
 
-    function addTimeGain(time, gain){
+    function addTimeGain(anger, disgust, fear, joy, sadness){
 
-        drawChart();
+        drawChart(anger, disgust, fear, joy, sadness);
     }
 
-    function drawChart(){
-        var data = google.visualization.arrayToDataTable(data_array);
-        var options = {
-            title: 'Mood',
-            curveType: 'function',
-            legend: { position: 'bottom' }
-            };
-        var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
-        chart.draw(data, options);
-    }
-
-    function drawChart() {
+    function drawChart(anger, disgust, fear, joy, sadness) {
 
         var data = google.visualization.arrayToDataTable([
           ['Mood', 'Per Day'],
-          ['Anger',     11],
-          ['Disgust',      2],
-          ['Fear',  2],
-          ['Joy', 2],
-          ['Sadness',    7]
+          ['Anger',    parseFloat(anger)],
+          ['Disgust',      parseFloat(disgust)],
+          ['Fear',  parseFloat(fear)],
+          ['Joy', parseFloat(joy)],
+          ['Sadness',    parseFloat(sadness)]
         ]);
 
         var options = {

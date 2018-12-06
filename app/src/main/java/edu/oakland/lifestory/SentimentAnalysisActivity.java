@@ -95,7 +95,7 @@ public class SentimentAnalysisActivity extends BaseActivity {
         @Override
         protected void onPostExecute(Sentiment result) {
             hideProgressDialog();
-            Log.d(TAG, "onPostExecute: " + result.getAnger() + result.getAnger() + result.getAnger() + result.getAnger() + result.getAnger());
+            Log.d(TAG, "onPostExecute: " + sentimentList.size());
             sentimentList.add(result);
             plotGraph(sentimentList);
         }
@@ -115,6 +115,9 @@ public class SentimentAnalysisActivity extends BaseActivity {
     }
 
     private void plotGraph(final List<Sentiment> sentimentList) {
+
+
+
         webView = findViewById(R.id. webView);
         webView.getSettings().setJavaScriptEnabled(true);
 
@@ -123,13 +126,26 @@ public class SentimentAnalysisActivity extends BaseActivity {
 
         /* WebViewClient must be set BEFORE calling loadUrl! */
         webView.setWebViewClient(new WebViewClient() {
+
+            double anger= 0.0, disgust= 0.0, joy= 0.0, fear= 0.0, sadness = 0.0;
+
             @Override
             public void onPageFinished(WebView view, String url) {
-                int i = 0;
                 for(Sentiment sentiment : sentimentList){
-                    bridge.addDataToWebView(sentiment.getAnger(), "" + i);
-                    i++;
+                    anger = anger + Double.parseDouble(sentiment.getAnger());
+                    disgust = disgust + Double.parseDouble(sentiment.getDisgust());
+                    joy = joy + Double.parseDouble(sentiment.getJoy());
+                    fear = fear + Double.parseDouble(sentiment.getFear());
+                    sadness = sadness + Double.parseDouble(sentiment.getSadness());
+                    Log.d("WEBVIEW >>>>> ", "onPageFinished: " + sentiment.getAnger());
+                    Log.d("WEBVIEW >>>>> ", "onPageFinished: " + sentiment.getDisgust());
+                    Log.d("WEBVIEW >>>>> ", "onPageFinished: " + sentiment.getJoy());
+                    Log.d("WEBVIEW >>>>> ", "onPageFinished: " + sentiment.getFear());
+                    Log.d("WEBVIEW >>>>> ", "onPageFinished: " + sentiment.getSadness());
                 }
+
+                bridge.addDataToWebView(new String[]{Double.toString(anger), Double.toString(disgust),
+                        Double.toString(fear), Double.toString(joy), Double.toString(sadness)});
             }
         });
         webView.loadUrl("file:///android_asset/index.html");

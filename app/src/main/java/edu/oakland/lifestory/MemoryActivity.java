@@ -59,11 +59,13 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 public class MemoryActivity extends AppCompatActivity {
     //boolean flag to know if main FAB is in open or closed state.
     private boolean fabExpanded = false;
-    private FloatingActionButton fabAttach, fabImage, fabAudio;
+    private FloatingActionButton fabAttach, fabImage, fabAudio, fabVideo, fabMap;
     //Linear layout holding the Image submenu
     private LinearLayout layoutFabImage;
     //Linear layout holding the Audio submenu
     private LinearLayout layoutFabAudio;
+    private LinearLayout layoutFabMapCheckin;
+    private LinearLayout layoutFabVideo;
 
     EditText memoryTitle, memoryContent;
     ImageButton backButton, createMemButton;
@@ -112,11 +114,16 @@ public class MemoryActivity extends AppCompatActivity {
         //Hide the app name
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        fabAttach = (FloatingActionButton) this.findViewById(R.id.fabAttach);
-        layoutFabImage = (LinearLayout) this.findViewById(R.id.layoutFabImage);
-        layoutFabAudio = (LinearLayout) this.findViewById(R.id.layoutFabAudio);
-        fabImage = (FloatingActionButton) this.findViewById(R.id.fabImage);
-        fabAudio = (FloatingActionButton) this.findViewById(R.id.fabAudio);
+        fabAttach = this.findViewById(R.id.fabAttach);
+        layoutFabImage = this.findViewById(R.id.layoutFabImage);
+        layoutFabAudio = this.findViewById(R.id.layoutFabAudio);
+        layoutFabVideo = this.findViewById(R.id.layoutFabVideo);
+        layoutFabMapCheckin = this.findViewById(R.id.layoutFabMapCheckin);
+
+        fabImage = this.findViewById(R.id.fabImage);
+        fabAudio = this.findViewById(R.id.fabAudio);
+        fabVideo = this.findViewById(R.id.fabVideo);
+        fabMap = this.findViewById(R.id.fabMap);
 
         playBtn = findViewById(R.id.playBtn);
         playBtn.setVisibility(View.GONE);
@@ -195,6 +202,19 @@ public class MemoryActivity extends AppCompatActivity {
             }
         });
 
+        fabVideo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //ToDO
+            }
+        });
+
+        fabMap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //ToDo
+            }
+        });
         backButton = toolbar.findViewById(R.id.backButton);
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -357,6 +377,9 @@ public class MemoryActivity extends AppCompatActivity {
     private void closeSubMenusFab(){
         layoutFabImage.setVisibility(View.INVISIBLE);
         layoutFabAudio.setVisibility(View.INVISIBLE);
+        layoutFabVideo.setVisibility(View.INVISIBLE);
+        layoutFabMapCheckin.setVisibility(View.INVISIBLE);
+
         fabAttach.setImageResource(R.drawable.ic_attach_file_white_24dp);
         fabExpanded = false;
     }
@@ -365,6 +388,8 @@ public class MemoryActivity extends AppCompatActivity {
     private void openSubMenusFab(){
         layoutFabImage.setVisibility(View.VISIBLE);
         layoutFabAudio.setVisibility(View.VISIBLE);
+        layoutFabVideo.setVisibility(View.VISIBLE);
+        layoutFabMapCheckin.setVisibility(View.VISIBLE);
         //Change settings icon to 'X' icon
         fabAttach.setImageResource(R.drawable.ic_close_white_24dp);
         fabExpanded = true;

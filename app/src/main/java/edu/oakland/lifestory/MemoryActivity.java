@@ -1,28 +1,35 @@
 package edu.oakland.lifestory;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.MediaPlayer;
+import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -34,6 +41,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.nbsp.materialfilepicker.MaterialFilePicker;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -44,8 +52,7 @@ import java.util.UUID;
 
 import edu.oakland.lifestory.model.Memory;
 import edu.oakland.lifestory.utils.Constants;
-import id.zelory.compressor.Compressor;
-import static android.Manifest.permission.CAMERA;
+
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 public class MemoryActivity extends AppCompatActivity {
@@ -72,6 +79,29 @@ public class MemoryActivity extends AppCompatActivity {
     private static final int GALLERY_INTENT = 2;
     private static final int CAMERA_REQUEST_CODE = 1;
     String mCurrentPhotoPath;
+
+    private MediaRecorder mRecorder = null;
+    private MediaPlayer mPlayer = null;
+
+    File mAudioFile;
+
+    boolean isRecording = false;
+    boolean isPlaying = false;
+
+    private TextView timerValue;
+
+    Chronometer cmTimer;
+    long elapsedTime;
+    Boolean resume = false;
+    Button recordBtn;
+    Button playBtn;
+
+    public static final int PERMISSIONS_REQUEST_CODE = 10;
+    public static final int FILE_PICKER_REQUEST_CODE = 12;
+    private final int MY_PERMISSIONS_RECORD_AUDIO = 11;
+    Long tsLong = System.currentTimeMillis()/1000;
+    String ts = tsLong.toString();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,6 +116,35 @@ public class MemoryActivity extends AppCompatActivity {
         layoutFabAudio = (LinearLayout) this.findViewById(R.id.layoutFabAudio);
         fabImage = (FloatingActionButton) this.findViewById(R.id.fabImage);
         fabAudio = (FloatingActionButton) this.findViewById(R.id.fabAudio);
+
+        recordBtn = findViewById(R.id.recordBtn);
+        recordBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                stopRecording();
+            }
+        });
+        cmTimer = (Chronometer) findViewById(R.id.cmTimer);
+        cmTimer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
+            public void onChronometerTick(Chronometer arg0) {
+                if (!resume) {
+                    long minutes = ((SystemClock.elapsedRealtime() - cmTimer.getBase())/1000) / 60;
+                    long seconds = ((SystemClock.elapsedRealtime() - cmTimer.getBase())/1000) % 60;
+                    elapsedTime = SystemClock.elapsedRealtime();
+                    Log.d("chrono", "onChronometerTick: " + minutes + " : " + seconds);
+                } else {
+                    long minutes = ((elapsedTime - cmTimer.getBase())/1000) / 60;
+                    long seconds = ((elapsedTime - cmTimer.getBase())/1000) % 60;
+                    elapsedTime = elapsedTime + 1000;
+                    Log.d("chrono", "onChronometerTick: " + minutes + " : " + seconds);
+                }
+            }
+        });
+        try {
+            mAudioFile = createAudioFile(this, "demo" + ts);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         mAuth = FirebaseAuth.getInstance();
         current_user_id = mAuth.getCurrentUser().getUid();
@@ -116,6 +175,15 @@ public class MemoryActivity extends AppCompatActivity {
                 showImageDialog();
             }
         });
+
+        fabAudio.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Action to choose gallery or camera
+                showAudioDialog();
+            }
+        });
+
         backButton = toolbar.findViewById(R.id.backButton);
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -175,6 +243,12 @@ public class MemoryActivity extends AppCompatActivity {
         });
     }
 
+    private void startRecording() {
+        recordBtn.setVisibility(View.VISIBLE);
+        cmTimer.setVisibility(View.VISIBLE);
+        requestAudioPermissions();
+    }
+
     void askPermissions(){
         if(ContextCompat.checkSelfPermission(this,READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             //TODO
@@ -188,6 +262,82 @@ public class MemoryActivity extends AppCompatActivity {
             Toast.makeText(this, "Write perm granted.", Toast.LENGTH_SHORT).show();
         } else {
             ActivityCompat.requestPermissions(this, new String[]{WRITE_EXTERNAL_STORAGE},Constants.PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE);
+        }
+    }
+
+    private static File createAudioFile(Context context, String audioName) throws IOException {
+        File storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PODCASTS);
+        File audio = File.createTempFile(
+                audioName,  /* prefix */
+                ".3gp",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        return audio;
+    }
+
+    private void requestAudioPermissions() {
+        if (ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            //When permission is not granted by user, show them message why this permission is needed.
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    android.Manifest.permission.RECORD_AUDIO)) {
+                Toast.makeText(this, "Please grant permissions to record audio", Toast.LENGTH_LONG).show();
+
+                //Give user option to still opt-in the permissions
+                ActivityCompat.requestPermissions(this,
+                        new String[]{android.Manifest.permission.RECORD_AUDIO},
+                        MY_PERMISSIONS_RECORD_AUDIO);
+
+            } else {
+                // Show user dialog to grant permission to record audio
+                ActivityCompat.requestPermissions(this,
+                        new String[]{android.Manifest.permission.RECORD_AUDIO},
+                        MY_PERMISSIONS_RECORD_AUDIO);
+            }
+        }
+        //If permission is granted, then go ahead recording audio
+        else if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.RECORD_AUDIO)
+                == PackageManager.PERMISSION_GRANTED) {
+
+            //Go ahead with recording audio now
+            recordAudio();
+        }
+    }
+
+    private void recordAudio() {
+        if (mRecorder == null) {
+            mRecorder = new MediaRecorder();
+            mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+            mRecorder.setOutputFile(mAudioFile.getAbsolutePath());
+            mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+        }
+
+        if (!isRecording) {
+            try {
+                mRecorder.prepare();
+                mRecorder.start();
+                isRecording = true;
+                isPlaying = false;
+
+                if(!resume) {
+                    cmTimer.setBase(SystemClock.elapsedRealtime());
+                    cmTimer.start();
+                } else {
+                    cmTimer.start();
+                }
+
+                Toast.makeText(getApplicationContext(), "Recording started", Toast.LENGTH_LONG).show();
+            } catch (IOException e) {
+                Log.e("Audio", "prepare() failed");
+            }
+        } else if (isRecording) {
+            isRecording = false;
+            stopRecording();
         }
     }
 
@@ -224,8 +374,6 @@ public class MemoryActivity extends AppCompatActivity {
                            chooseImageFromGallery();
                            break;
                     case 1: //from camera
-                           //captureImageFromCamera();
-                            //dispatchTakePictureIntent();
                             takePicAndDisplayIt();
                            break;
                     case 2: //cancel
@@ -236,21 +384,78 @@ public class MemoryActivity extends AppCompatActivity {
         imageDialog.show();
     }
 
+    private void showAudioDialog(){
+        AlertDialog.Builder imageDialog = new AlertDialog.Builder(this);
+        imageDialog.setTitle("Select Action");
+        String[] imageDialogItems = {
+                "Choose Audio from Device",
+                "Record Audio",
+                "Cancel"
+        };
+        imageDialog.setItems(imageDialogItems, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which){
+                    case 0: //from gallery
+                        chooseImageFromDevice();
+                        break;
+                    case 1: //from camera
+                        startRecording();
+                        break;
+                    case 2: //cancel
+                        break;
+                }
+            }
+        });
+        imageDialog.show();
+    }
+
+    private void chooseImageFromDevice() {
+    }
+
+    public void stopRecording() {
+        if (mRecorder != null) {
+            mRecorder.stop();
+            mRecorder.reset();
+            mRecorder.release();
+            mRecorder = null;
+            cmTimer.stop();
+            cmTimer.setText("00:00");
+            Toast.makeText(getApplicationContext(), "Recording stopped", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public void startPlaying(View view) {
+        Log.e("startPlaying", ""+isPlaying);
+        if(!isPlaying){
+            mPlayer = new MediaPlayer();
+            try {
+                mPlayer.setDataSource(mAudioFile.getAbsolutePath());
+                mPlayer.prepare();
+                mPlayer.start();
+                isPlaying = true;
+            } catch (IOException e) {
+                Log.e("Audio", "prepare() failed");
+            }
+        } else if(isPlaying){
+            stopPlaying();
+        }
+    }
+
+    public void stopPlaying() {
+        if (mPlayer != null) {
+            mPlayer.release();
+            mPlayer = null;
+            isPlaying = false;
+        }
+    }
+
     private void chooseImageFromGallery(){
         if(ContextCompat.checkSelfPermission(this, READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             MemoryActivity.this.startActivityForResult(galleryIntent, Constants.REQUEST_PICK_IMAGE);
         } else {
             ActivityCompat.requestPermissions(this, new String[]{READ_EXTERNAL_STORAGE},Constants.PERMISSION_REQUEST_READ_EXTERNAL_STORAGE);
-        }
-    }
-
-    private void captureImageFromCamera(){
-        if(ContextCompat.checkSelfPermission(this, CAMERA) == PackageManager.PERMISSION_GRANTED) {
-            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            MemoryActivity.this.startActivityForResult(intent, Constants.REQUEST_IMAGE_CAPTURE);
-        } else {
-            ActivityCompat.requestPermissions(this, new String[]{CAMERA}, Constants.PERMISSION_REQUEST_CAMERA);
         }
     }
 
@@ -271,38 +476,42 @@ public class MemoryActivity extends AppCompatActivity {
                     Toast.makeText(this, "Permission Denied", Toast.LENGTH_LONG).show();
                 }
             }
+            case MY_PERMISSIONS_RECORD_AUDIO: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted, yay!
+                    recordAudio();
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                    showError();
+                    recordBtn.setEnabled(false);
+                }
+                return;
+            }
+            case PERMISSIONS_REQUEST_CODE: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    openFilePicker();
+                } else {
+                    showError();
+                }
+            }
         }
     }
 
-//    @Override
-//    public void onActivityResult(int requestCode, int resultCode, Intent data){
-//        super.onActivityResult(requestCode, resultCode, data);
-//
-//        if(resultCode == this.RESULT_CANCELED){
-//            return;
-//        }
-//        if(requestCode == Constants.REQUEST_PICK_IMAGE){
-//            if(data != null){
-//                final String randomName = UUID.randomUUID().toString();
-//                Uri contentUri = data.getData();
-//                imgUri = contentUri;
-//                try{
-//                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), contentUri);
-//                    //Toast.makeText(MemoryActivity.this, "Image Saved!", Toast.LENGTH_SHORT).show();
-//                    imageView.setImageBitmap(bitmap.createScaledBitmap(bitmap, bitmap.getWidth(), bitmap.getHeight(), true));
-//                    handleMemoryImgUpload(imgUri);
-//                } catch(IOException ie){
-//                    ie.printStackTrace();
-//                    Toast.makeText(MemoryActivity.this, "Failed!", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//        } else if(requestCode == Constants.REQUEST_IMAGE_CAPTURE){
-//                Bitmap thumbnail = (Bitmap)data.getExtras().get("data");
-//                imageView.setImageBitmap(thumbnail);
-//                Toast.makeText(MemoryActivity.this, "Image Saved!", Toast.LENGTH_SHORT).show();
-//                handleMemoryImgUpload(imgUri);
-//        }
-//    }
+    private void openFilePicker() {
+        new MaterialFilePicker()
+                .withActivity(this)
+                .withRequestCode(FILE_PICKER_REQUEST_CODE)
+                .withHiddenFiles(true)
+                .withTitle("Choose an Audio File")
+                .start();
+    }
+
+    private void showError() {
+        Toast.makeText(this, "Required permissions not granted.", Toast.LENGTH_SHORT).show();
+    }
 
     private File createImageFile() throws IOException {
         // Create an image file name
@@ -335,29 +544,6 @@ public class MemoryActivity extends AppCompatActivity {
         }
     }
 
-    private void dispatchTakePictureIntent() {
-        Toast.makeText(this, "in dispatchTakePictureIntent", Toast.LENGTH_SHORT).show();
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Ensure that there's a camera activity to handle the intent
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            // Create the File where the photo should go
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-            } catch (IOException ex) {
-                // Error occurred while creating the File...
-            }
-            // Continue only if the File was successfully created
-            if (photoFile != null) {
-                Uri photoURI = FileProvider.getUriForFile(this,
-                        "com.example.android.fileprovider",
-                        photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                startActivityForResult(takePictureIntent, CAMERA_REQUEST_CODE);
-            }
-        }
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         //super.onActivityResult(requestCode, resultCode, data);
@@ -385,70 +571,8 @@ public class MemoryActivity extends AppCompatActivity {
                             Log.d(">> TASK FAILED", "onComplete: ");
                         }
                     }
-
-                    private void addImgRefToFirebase(Task<Uri> downloadUrl) {
-                    }
                 });
-
-//                filepath.putFile(getImageUri((Bitmap) data.getExtras().get("data"))).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-//                    @Override
-//                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-//                        Log.d("download uri >>>> ", "onSuccess: " + taskSnapshot.getStorage().getDownloadUrl());
-//                        Log.d("download uri >>>> ", "onSuccess: " + taskSnapshot.getStorage().getDownloadUrl().getResult().getPath());
-//                        addImgRefToFirebase(taskSnapshot.getStorage().getDownloadUrl());
-//                        Toast.makeText(MemoryActivity.this, "Upload Successful!", Toast.LENGTH_SHORT).show();
-//                    }
-//
-//                    private void addImgRefToFirebase(Task<Uri> downloadUrl) {
-//                    }
-//                }).addOnFailureListener(new OnFailureListener() {
-//                    @Override
-//                    public void onFailure(@NonNull Exception e) {
-//                        Toast.makeText(MemoryActivity.this, "Upload Failed!", Toast.LENGTH_SHORT).show();
-//                    }
-//                });
             }
-        }
-    }
-
-    private void handleMemoryImgUpload(Uri contentUri) {
-        Toast.makeText(this, "Inside memory upload", Toast.LENGTH_SHORT).show();
-        if(contentUri != null) {
-            final String randomName = UUID.randomUUID().toString();
-
-            File newImageFile = new File(contentUri.getPath());
-
-            try {
-                compressedImageFile = new Compressor(MemoryActivity.this)
-                        .setMaxHeight(720)
-                        .setMaxWidth(720)
-                        .setQuality(50)
-                        .compressToBitmap(newImageFile);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            compressedImageFile.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            byte[] imageData = baos.toByteArray();
-
-            UploadTask filePath = storageReference.child("memory_images").child(randomName + ".jpg").putBytes(imageData);
-            filePath.addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                private static final String TAG = ">>>>UploadIm";
-                @Override
-                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                    if(task.isSuccessful()){
-                        downloadUri = task.getResult().getStorage().getDownloadUrl().toString();
-                        Log.d(TAG, ">>>>>>>>>>>>> Upload Image onComplete: " + downloadUri);
-                        Toast.makeText(MemoryActivity.this, "Uploded successfully", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(MemoryActivity.this, "Uploded failed", Toast.LENGTH_SHORT).show();
-                    }
-
-                }
-            });
-
         }
     }
 

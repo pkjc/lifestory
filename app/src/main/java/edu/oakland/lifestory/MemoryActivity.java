@@ -459,7 +459,7 @@ public class MemoryActivity extends AppCompatActivity {
             mRecorder = null;
             cmTimer.stop();
             cmTimer.setText("00:00");
-            Toast.makeText(getApplicationContext(), "Recording stopped" + mAudioFile.getPath(), Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Recording stopped", Toast.LENGTH_LONG).show();
 
             uploadAudio();
         }
@@ -483,7 +483,7 @@ public class MemoryActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<Uri> task) {
                 if (task.isSuccessful()) {
                     Uri downloadUri = task.getResult();
-                    Toast.makeText(MemoryActivity.this, "Upload Successful!"+ downloadUri, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MemoryActivity.this, "Upload Successful!", Toast.LENGTH_SHORT).show();
                 } else {
                     // Handle failures
                     // ...
